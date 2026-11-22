@@ -33,6 +33,7 @@ CONTAINER_DATA_DIR = "/opt/skill-eval/data"
 CONTAINER_CHECKPOINT_DIR = "/opt/flink/checkpoints"
 HOST_DATA_DIR = PROJECT_ROOT / "data"
 JOBMANAGER_SERVICE = "flink-jobmanager"
+KAFKA_SERVICE = "kafka"
 
 REST_READY_TIMEOUT_S = 90
 ROLL_CHECK_INTERVAL_S = 5
@@ -175,6 +176,24 @@ def running_job_id() -> str | None:
     return None
 
 
+def _ensure_topic() -> None:
+    """토픽이 없으면 만든다. 새 브로커에서는 첫 produce 전까지 토픽이 없어 Flink 소스가 기동에 실패한다."""
+    topic = load_config()["transport"]["kafka"]["topic"]
+    subprocess.run(
+        ["docker", "compose", "exec", "-T", KAFKA_SERVICE, "/opt/kafka/bin/kafka-topics.sh",
+         "--bootstrap-server", "localhost:9092", "--create", "--if-not-exists", "--topic", topic],
+        cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=60, check=True,
+    )
+
+
+def _cancel_active_jobs() -> None:
+    """RUNNING에 못 오른 채 재시작을 반복하는 잡을 정리한다 (같은 이름의 잡이 겹쳐 뜨지 않게)."""
+    job_name = _flink_cfg()["job_name"]
+    for job in _get("/jobs/overview")["jobs"]:
+        if job["name"] == job_name and job["state"] in ACTIVE_STATES:
+            requests.patch(f"{_rest_url()}/jobs/{job['jid']}", params={"mode": "cancel"}, timeout=10).raise_for_status()
+
+
 def _run_sql(sql: str) -> str | None:
     """SQL을 제출하고 잡이 RUNNING에 도달하면 잡 ID를, 기동에 실패하면 None을 돌려준다."""
     JOBS_DIR.mkdir(parents=True, exist_ok=True)
@@ -196,6 +215,7 @@ def _run_sql(sql: str) -> str | None:
             break
         time.sleep(2)
     print(f"Flink 잡 기동 실패:\n{result.stdout[-3000:]}\n{result.stderr[-3000:]}", file=sys.stderr)
+    _cancel_active_jobs()
     return None
 
 
@@ -206,6 +226,7 @@ def submit() -> str:
         print(json.dumps({"job_id": job_id, "submitted": False, "reason": "이미 실행 중"}, ensure_ascii=False))
         return job_id
 
+    _ensure_topic()
     restore_from = latest_checkpoint_path()
     job_id = _run_sql(render_sql(restore_from))
     if not job_id and restore_from:

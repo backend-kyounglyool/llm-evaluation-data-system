@@ -3,6 +3,7 @@
 # Airflow(CeleryExecutor) 공통 설정 — 'airflow' 프로파일: make airflow-up
 x-airflow-common: &airflow-common
   image: skill-eval-airflow:2.10.5
+  restart: unless-stopped
   profiles: [airflow]
   environment:
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -35,21 +36,27 @@ x-airflow-common: &airflow-common
 services:
   kafka:
     image: apache/kafka:3.8.1
+    restart: unless-stopped
     ports:
-      - "19092:19092"
+      - "127.0.0.1:19092:19092"   # 같은 장비의 프로세스용
+      # 다른 장비의 에이전트용. 기본은 닫혀 있고, .env의 KAFKA_LAN_BIND/KAFKA_LAN_HOST로 연다 (인증 없음 — 사설망에서만)
+      - "${KAFKA_LAN_BIND:-127.0.0.1}:19093:19093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:19092
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:19092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:19092,LAN://0.0.0.0:19093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://127.0.0.1:19092,LAN://${KAFKA_LAN_HOST:-127.0.0.1}:19093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,LAN:PLAINTEXT
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
       interval: 10s
@@ -58,11 +65,12 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
+    restart: unless-stopped
     environment:
       KAFKA_CLUSTERS_0_NAME: skill-eval
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
       kafka:
         condition: service_healthy
@@ -71,9 +79,10 @@ services:
   flink-jobmanager:
     build: pipeline/flink
     image: skill-eval-flink:1.20
+    restart: unless-stopped
     command: jobmanager
     ports:
-      - "8081:8081"   # Flink UI / REST
+      - "127.0.0.1:8081:8081"   # Flink UI / REST (잡 제출이 가능하므로 외부에 열지 않는다)
     environment: &flink-env
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: flink-jobmanager
@@ -96,6 +105,7 @@ services:
 
   flink-taskmanager:
     image: skill-eval-flink:1.20
+    restart: unless-stopped
     command: taskmanager
     environment: *flink-env
     volumes: *flink-volumes
@@ -104,12 +114,13 @@ services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.103.0
+    restart: unless-stopped
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./telemetry/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
+      - "127.0.0.1:4317:4317"   # OTLP gRPC
+      - "127.0.0.1:4318:4318"   # OTLP HTTP
     depends_on:
       kafka:
         condition: service_healthy
@@ -117,6 +128,7 @@ services:
   # ── 모니터링: Prometheus + Grafana(http://localhost:3001) + Tempo ──
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.8.0
+    restart: unless-stopped
     command: ["--kafka.server=kafka:9092"]
     depends_on:
       kafka:
@@ -125,6 +137,7 @@ services:
   # Airflow(호스트)가 보내는 StatsD 메트릭을 Prometheus 형식으로 변환
   statsd-exporter:
     image: prom/statsd-exporter:v0.28.0
+    restart: unless-stopped
     command: ["--statsd.mapping-config=/etc/statsd-mapping.yml"]
     volumes:
       - ./monitoring/statsd-mapping.yml:/etc/statsd-mapping.yml
@@ -133,6 +146,7 @@ services:
 
   tempo:
     image: grafana/tempo:2.6.1
+    restart: unless-stopped
     user: "0"
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
@@ -143,6 +157,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v3.16.0
+    restart: unless-stopped
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -151,6 +166,7 @@ services:
 
   grafana:
     image: grafana/grafana:11.6.16
+    restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GF_ANALYTICS_REPORTING_ENABLED: "false"
@@ -181,6 +197,7 @@ services:
   # ── Airflow (profile: airflow) — 웹 UI http://localhost:8082, Flower http://localhost:5555 ──
   airflow-postgres:
     image: postgres:16
+    restart: unless-stopped
     profiles: [airflow]
     environment:
       POSTGRES_USER: airflow
@@ -195,6 +212,7 @@ services:
 
   airflow-redis:
     image: redis:7-alpine
+    restart: unless-stopped
     profiles: [airflow]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -204,6 +222,7 @@ services:
   airflow-init:
     <<: *airflow-common
     build: airflow   # 이미지는 여기서 한 번만 빌드하고 나머지 서비스가 공유한다
+    restart: "no"
     command:
       - bash
       - -c
@@ -239,6 +258,7 @@ services:
       - "127.0.0.1:5555:5555"
 
 volumes:
+  kafka-data:
   airflow-postgres-data:
   flink-checkpoints:
   tempo-data:

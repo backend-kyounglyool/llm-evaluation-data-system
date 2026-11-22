@@ -1,6 +1,6 @@
 PY := .venv/bin/python
 
-.PHONY: test setup infra-up infra-down airflow-up grafana-secrets flink-submit flink-status run-eval pipeline eval-report improve label-quality lifecycle distill router dashboard demo clean
+.PHONY: test install-boot setup infra-up infra-down airflow-up grafana-secrets flink-submit flink-status run-eval pipeline eval-report improve label-quality lifecycle distill router dashboard demo clean
 
 setup:
 	python3 -m venv .venv
@@ -13,6 +13,10 @@ test:
 infra-up: grafana-secrets
 	docker compose up -d
 	$(MAKE) flink-submit
+
+# (macOS 서버) 로그인 시 전체 스택을 자동 기동하는 launchd 에이전트 설치 — docs/macmini.md
+install-boot:
+	./scripts/install_boot.sh
 
 # Grafana Snowflake 데이터소스용 키 파일 생성 (.grafana/secrets/, git 제외)
 grafana-secrets:

@@ -160,6 +160,10 @@ dashboard/    Streamlit (DuckDB mart 조회)
 | `mart_labeler_cost` | Jev vs LLM vs 캐스케이드 정확도·비용 (label-quality 실행 시 실측으로 갱신) |
 | `mart_skill_lifecycle` | keep / improve / deactivate 판정과 근거 |
 
+## 서버로 운영하기
+
+맥미니 한 대에 올려 상시 운영하는 절차(자동 기동, 원격 접속, 주의점)는 [docs/macmini.md](docs/macmini.md).
+
 ## 주의사항
 
 - 공개 API·목 데이터·직접 생성한 테스트 트래픽만 사용 (회사 내부 데이터 금지)
