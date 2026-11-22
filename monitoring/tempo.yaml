@@ -1,4 +1,7 @@
 # Tempo 단일 바이너리(로컬 디스크). 앱이 OTLP/HTTP로 보낸 span 트리를 저장하고 Grafana가 조회한다.
+# Grafana 11의 Tempo 데이터소스는 TraceQL 검색을 gRPC 스트리밍으로 보낸다. HTTP 포트에서 gRPC도 받게 한다.
+stream_over_http_enabled: true
+
 server:
   http_listen_port: 3200
 
