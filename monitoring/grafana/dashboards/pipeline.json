@@ -1328,9 +1328,9 @@
       "targets": [
         {
           "queryType": "traceql",
-          "query": "{resource.service.name != \"\"}",
+          "query": "{span.event.type = \"request_done\"} | select(span.request.body, span.skill, span.status, span.user.type, resource.service.name)",
           "limit": 20,
-          "tableType": "traces",
+          "tableType": "spans",
           "datasource": {
             "type": "tempo",
             "uid": "tempo"
@@ -1343,7 +1343,7 @@
         "overrides": []
       },
       "options": {},
-      "description": "Trace ID를 누르면 span 워터폴이 열린다.",
+      "description": "요청(request) span 한 줄이 메시지 1개다. request.body는 질문 본문(앱이 보낸 경우에만, Tempo에만 7일 보관). Trace ID를 누르면 span 워터폴이 열린다.",
       "id": 35,
       "gridPos": {
         "x": 8,
