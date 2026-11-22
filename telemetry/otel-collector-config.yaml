@@ -1,5 +1,7 @@
-# OTel Collector: OTLP 수신 → Kafka(agent-events) 전달.
-# 앱 내부 Span Processor가 본문을 이미 제거한 뒤이므로 여기엔 지표·태그만 도달한다.
+# OTel Collector: 외부 앱의 OTLP span 수신 → Kafka(otel-spans) 전달.
+# OTLP JSON은 raw 이후 단계가 읽지 못하므로 agent-events에 직접 쓰지 않는다.
+# otel-bridge(pipeline/otel_bridge.py)가 otel-spans를 AgentEvent로 바꿔 agent-events에 넣는다.
+# 앱은 본문을 보내지 않는 것이 원칙이고, 아래 strip-body는 그래도 섞여 온 본문을 지우는 2차 방어선이다.
 receivers:
   otlp:
     protocols:
@@ -11,7 +13,6 @@ receivers:
 processors:
   batch:
     timeout: 2s
-  # 2차 방어선: 혹시 남아 있는 본문 속성을 collector에서도 제거
   attributes/strip-body:
     actions:
       - key: request.body
@@ -22,7 +23,7 @@ processors:
 exporters:
   kafka:
     brokers: [kafka:9092]
-    topic: agent-events
+    topic: otel-spans
     encoding: otlp_json
 
 service:
