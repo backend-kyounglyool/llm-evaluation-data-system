@@ -1,0 +1,578 @@
+{
+  "uid": "skill-eval-mart",
+  "title": "skill-eval · 평가 지표 (Snowflake mart)",
+  "tags": [
+    "skill-eval"
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "editable": true,
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "적재 현황",
+      "collapsed": false,
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "raw 이벤트",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT COUNT(*) AS raw_events FROM raw_events",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 2,
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "cleansed 이벤트",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT COUNT(*) AS cleansed_events FROM cleansed_events",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 3,
+      "gridPos": {
+        "x": 4,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "quarantine",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT COUNT(*) AS quarantined FROM quarantine_events",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 4,
+      "gridPos": {
+        "x": 8,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "일자별 이벤트 수",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT dt, COUNT(*) AS events FROM cleansed_events GROUP BY dt ORDER BY dt",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "xField": "DT",
+        "legend": {
+          "showLegend": false
+        }
+      },
+      "id": 5,
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 12,
+        "h": 4
+      }
+    },
+    {
+      "type": "row",
+      "title": "스킬 선택 평가",
+      "collapsed": false,
+      "id": 6,
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "run별 선택 정확도",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT run_id, accuracy FROM mart_selection_eval ORDER BY run_id",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1,
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "RUN_ID",
+        "xTickLabelRotation": -30,
+        "legend": {
+          "showLegend": false
+        }
+      },
+      "id": 7,
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 10,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "run별 상세",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT run_id, skill_version, cases, accuracy, macro_precision, macro_recall, false_pick_rate, miss_rate, negative_false_pick_rate FROM mart_selection_eval ORDER BY run_id DESC",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "ACCURACY|MACRO_.*|.*_RATE"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {},
+      "id": 8,
+      "gridPos": {
+        "x": 10,
+        "y": 6,
+        "w": 14,
+        "h": 8
+      }
+    },
+    {
+      "type": "row",
+      "title": "스킬 사용 현황",
+      "collapsed": false,
+      "id": 9,
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "스킬별 호출 수",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT skill, SUM(calls) AS calls FROM mart_skill_usage_daily GROUP BY skill ORDER BY calls DESC",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "xField": "SKILL",
+        "xTickLabelRotation": -30,
+        "legend": {
+          "showLegend": false
+        }
+      },
+      "id": 10,
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 8,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "스킬별 일간 지표",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT dt, skill, calls, success_rate, tool_success_rate, p50_latency_ms, p95_latency_ms, tokens_in, tokens_out, cost_usd FROM mart_skill_usage_daily ORDER BY dt DESC, calls DESC",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*SUCCESS_RATE"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "P\\d+_LATENCY_MS"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "COST_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              }
+            ]
+          }
+        ]
+      },
+      "options": {},
+      "id": 11,
+      "gridPos": {
+        "x": 8,
+        "y": 15,
+        "w": 16,
+        "h": 8
+      }
+    },
+    {
+      "type": "row",
+      "title": "의도 태그 · 라벨러",
+      "collapsed": false,
+      "id": 12,
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "piechart",
+      "title": "intent 분포",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT intent, SUM(\"COUNT\") AS events FROM mart_intent_tags_daily GROUP BY intent ORDER BY events DESC",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": true
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        }
+      },
+      "id": 13,
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 8,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "intent별 확신도",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT dt, intent, \"COUNT\" AS events, avg_p, low_conf_ratio, taxonomy_version FROM mart_intent_tags_daily ORDER BY dt DESC, events DESC",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "LOW_CONF_RATIO"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {},
+      "id": 14,
+      "gridPos": {
+        "x": 8,
+        "y": 24,
+        "w": 8,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "라벨러별 건수·비용",
+      "datasource": {
+        "type": "michelin-snowflake-datasource",
+        "uid": "snowflake"
+      },
+      "targets": [
+        {
+          "queryText": "SELECT labeler, source, items, est_cost_per_1k_usd, avg_intent_p FROM mart_labeler_cost ORDER BY items DESC",
+          "queryType": "table",
+          "timeColumns": [],
+          "datasource": {
+            "type": "michelin-snowflake-datasource",
+            "uid": "snowflake"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "EST_COST_PER_1K_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              }
+            ]
+          }
+        ]
+      },
+      "options": {},
+      "id": 15,
+      "gridPos": {
+        "x": 16,
+        "y": 24,
+        "w": 8,
+        "h": 8
+      }
+    }
+  ]
+}

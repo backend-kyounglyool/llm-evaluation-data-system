@@ -1,0 +1,650 @@
+{
+  "uid": "skill-eval-airflow",
+  "title": "skill-eval · Airflow",
+  "tags": [
+    "skill-eval"
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "editable": true,
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "규모",
+      "collapsed": false,
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "스케줄러 수",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "airflow-db"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT count(*) AS schedulers FROM job WHERE job_type = 'SchedulerJob' AND state = 'running' AND latest_heartbeat > now() - interval '60 seconds'",
+          "format": "table",
+          "rawQuery": true,
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "airflow-db"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "description": "메타데이터 DB에서 최근 60초 안에 하트비트를 보낸 SchedulerJob 수.",
+      "id": 2,
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 4,
+        "h": 5
+      }
+    },
+    {
+      "type": "stat",
+      "title": "워커 수",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(flower_worker_online)",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "description": "Flower가 본 온라인 Celery 워커 수.",
+      "id": 3,
+      "gridPos": {
+        "x": 4,
+        "y": 1,
+        "w": 4,
+        "h": 5
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Executor 슬롯 (빈 슬롯 / 실행 중 / 대기)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(airflow_executor_open_slots)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "open",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max(airflow_executor_running_tasks)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "running",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        },
+        {
+          "expr": "max(airflow_executor_queued_tasks)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "queued",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "description": "전체 슬롯 = open + running (core.parallelism).",
+      "id": 4,
+      "gridPos": {
+        "x": 8,
+        "y": 1,
+        "w": 8,
+        "h": 5
+      }
+    },
+    {
+      "type": "stat",
+      "title": "스케줄된 태스크 (실행 대기)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(airflow_pool_slots{state=\"scheduled\"})",
+          "instant": true,
+          "range": false,
+          "legendFormat": "scheduled",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max(airflow_scheduler_tasks_executable)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "executable",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        },
+        {
+          "expr": "max(airflow_scheduler_tasks_starving)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "starving",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "description": "scheduled: 풀 슬롯을 기다리는 태스크. starving: 슬롯이 없어 못 도는 태스크.",
+      "id": 5,
+      "gridPos": {
+        "x": 16,
+        "y": 1,
+        "w": 8,
+        "h": 5
+      }
+    },
+    {
+      "type": "row",
+      "title": "슬롯 · 워커 추이",
+      "collapsed": false,
+      "id": 6,
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "풀 슬롯 (상태별)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum by (pool, state) (airflow_pool_slots)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "{{pool}} · {{state}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "id": 7,
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Executor 슬롯",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(airflow_executor_open_slots)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "open",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max(airflow_executor_running_tasks)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "running",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        },
+        {
+          "expr": "max(airflow_executor_queued_tasks)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "queued",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "id": 8,
+      "gridPos": {
+        "x": 12,
+        "y": 7,
+        "w": 6,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "워커별 실행 중 태스크",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum by (worker) (flower_worker_number_of_currently_executing_tasks)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "{{worker}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "id": 9,
+      "gridPos": {
+        "x": 18,
+        "y": 7,
+        "w": 6,
+        "h": 8
+      }
+    },
+    {
+      "type": "row",
+      "title": "스케줄러",
+      "collapsed": false,
+      "id": 10,
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "스케줄러 하트비트",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(airflow_scheduler_heartbeat[2m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "heartbeat/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "description": "여러 스케줄러의 합계. 대수는 위 '스케줄러 수'를 본다.",
+      "id": 11,
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "스케줄러 루프 시간",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(airflow_scheduler_scheduler_loop_duration{quantile=\"0.9\"})",
+          "instant": false,
+          "range": true,
+          "legendFormat": "p90",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 12,
+      "gridPos": {
+        "x": 8,
+        "y": 16,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "stat",
+      "title": "DAG 수 / import 오류",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(airflow_dagbag_size)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "dags",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max(airflow_dag_processing_import_errors)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "import errors",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "id": 13,
+      "gridPos": {
+        "x": 16,
+        "y": 16,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "row",
+      "title": "DAG · skill_eval_elt",
+      "collapsed": false,
+      "id": 14,
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "DAG 실행 시간",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max by (state) (airflow_dagrun_duration{dag_id=\"skill_eval_elt\",quantile=\"0.5\"})",
+          "instant": false,
+          "range": true,
+          "legendFormat": "{{state}} p50",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 15,
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 8,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "태스크 상태별 건수",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "airflow-db"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COALESCE(state, 'none') AS state, count(*) AS tasks FROM task_instance GROUP BY 1 ORDER BY 2 DESC",
+          "format": "table",
+          "rawQuery": true,
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "airflow-db"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "id": 16,
+      "gridPos": {
+        "x": 8,
+        "y": 23,
+        "w": 4,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "최근 DAG 실행",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "airflow-db"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT dag_id, run_type, state, start_date, round(extract(epoch FROM (end_date - start_date))::numeric, 1) AS duration_s FROM dag_run ORDER BY start_date DESC NULLS LAST LIMIT 20",
+          "format": "table",
+          "rawQuery": true,
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "airflow-db"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "id": 17,
+      "gridPos": {
+        "x": 12,
+        "y": 23,
+        "w": 12,
+        "h": 8
+      }
+    }
+  ]
+}

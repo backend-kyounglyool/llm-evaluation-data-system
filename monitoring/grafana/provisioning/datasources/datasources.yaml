@@ -1,0 +1,53 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    access: proxy
+    url: http://tempo:3200
+
+  # mart 조회. 키는 make grafana-secrets가 .grafana/secrets/에 만든다
+  - name: Snowflake
+    type: michelin-snowflake-datasource
+    uid: snowflake
+    jsonData:
+      account: $SNOWFLAKE_ACCOUNT
+      username: $SNOWFLAKE_USER
+      role: $SNOWFLAKE_ROLE
+      warehouse: $SNOWFLAKE_WAREHOUSE
+      database: $SNOWFLAKE_DATABASE
+      schema: $SNOWFLAKE_SCHEMA
+    secureJsonData:
+      privateKey: $__file{/run/secrets/snowflake_private_key}
+
+  # Airflow 메타데이터 DB — 살아 있는 스케줄러 수, 태스크 상태별 건수, DAG 실행 이력
+  - name: Airflow DB
+    type: postgres
+    uid: airflow-db
+    url: airflow-postgres:5432
+    user: airflow
+    jsonData:
+      database: airflow
+      sslmode: disable
+      postgresVersion: 1600
+    secureJsonData:
+      password: airflow
+
+  # S3 raw 버킷 크기·객체 수 (CloudWatch 일 단위 스토리지 메트릭)
+  - name: CloudWatch
+    type: cloudwatch
+    uid: cloudwatch
+    jsonData:
+      authType: keys
+      defaultRegion: $AWS_REGION
+    secureJsonData:
+      accessKey: $AWS_ACCESS_KEY_ID
+      secretKey: $AWS_SECRET_ACCESS_KEY

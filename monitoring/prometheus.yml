@@ -1,0 +1,25 @@
+# skill-eval 파이프라인 구성 요소별 메트릭 수집
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: kafka
+    static_configs:
+      - targets: ["kafka-exporter:9308"]
+  - job_name: flink
+    static_configs:
+      - targets: ["flink-jobmanager:9249", "flink-taskmanager:9249"]
+  - job_name: otel-collector
+    static_configs:
+      - targets: ["otel-collector:8888"]
+  - job_name: tempo
+    static_configs:
+      - targets: ["tempo:3200"]
+  # Airflow가 StatsD로 보낸 메트릭(슬롯·스케줄 등). statsd-exporter가 변환
+  - job_name: airflow
+    static_configs:
+      - targets: ["statsd-exporter:9102"]
+  # Celery 워커 수·태스크 이벤트 (make airflow-up으로 띄웠을 때만 up)
+  - job_name: airflow-flower
+    static_configs:
+      - targets: ["airflow-flower:5555"]

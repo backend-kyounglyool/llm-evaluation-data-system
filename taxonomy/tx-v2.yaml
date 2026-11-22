@@ -1,0 +1,30 @@
+# tx-v1 대비: 일정_정리 → 복합_브리핑. 여러 영역을 한 번에 묻는 요청(출근 브리핑 등)이
+# 단일 영역 라벨로 흩어지던 문제를 정의로 해소한다.
+taxonomy_version: tx-v2
+questions:
+  intent:
+    type: choice
+    instructions: "What is the user's primary intent in `request`? If it asks for information from two or more domains together, or for a briefing or plan that names no single domain, choose 복합_브리핑."
+    options:
+      교통_조회: "Only public transit: real-time arrival or route"
+      날씨_조회: "Only weather: current conditions or forecast"
+      문화_탐색: "Only performances or events: finding or choosing one"
+      복합_브리핑: "A combined briefing or plan spanning several domains at once, e.g. a morning or commute briefing needing weather and transit together, or performances together with weather"
+      기타: "None of the above"
+  out_of_scope:
+    type: bool
+    instructions: "Is `request` outside what the available tools can handle?"
+  skill_fit:
+    type: bool
+    instructions: "Does `selected_skill` fit `request`, given `skill_descriptions`?"
+  complexity:
+    type: score
+    instructions: "How many distinct steps does `request` require?"
+    scale: [1, 5]
+    # Jev score 질문의 criteria. 위치가 점수(0..4)이고 scale[0]을 더해 1..5로 기록한다.
+    levels:
+      - "One simple lookup"
+      - "Two lookups or one lookup with a simple condition"
+      - "Three or more lookups combined"
+      - "Multi-step planning across several tools"
+      - "Complex multi-step planning with dependencies"

@@ -1,0 +1,1356 @@
+{
+  "uid": "skill-eval-pipeline",
+  "title": "skill-eval · 파이프라인 상태",
+  "tags": [
+    "skill-eval"
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "editable": true,
+  "templating": {
+    "list": [
+      {
+        "name": "bucket",
+        "label": "S3 버킷",
+        "type": "constant",
+        "query": "skill-eval-lake-740255825084",
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "수집 대상 상태",
+      "collapsed": false,
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "구성 요소 가동 여부",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "min by (job) (up)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{job}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "description": "Prometheus 수집 대상별 up. airflow는 StatsD 수신기, airflow-flower는 Celery 모니터 상태다. Airflow 상세는 별도 대시보드.",
+      "id": 2,
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 24,
+        "h": 4
+      }
+    },
+    {
+      "type": "row",
+      "title": "Kafka · agent-events",
+      "collapsed": false,
+      "id": 3,
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "토픽 누적 메시지 (end offset)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(kafka_topic_partition_current_offset{topic=\"agent-events\"})",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 4,
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 6,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "유입 속도",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(kafka_topic_partition_current_offset{topic=\"agent-events\"}[1m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "msg/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 5,
+      "gridPos": {
+        "x": 6,
+        "y": 6,
+        "w": 9,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "컨슈머 그룹 랙",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum by (consumergroup) (kafka_consumergroup_lag{topic=\"agent-events\"})",
+          "instant": false,
+          "range": true,
+          "legendFormat": "{{consumergroup}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "description": "Flink 그룹(skill-eval-flink)은 체크포인트 때 오프셋을 커밋하므로 체크포인트 주기만큼 랙이 보일 수 있다.",
+      "id": 6,
+      "gridPos": {
+        "x": 15,
+        "y": 6,
+        "w": 9,
+        "h": 6
+      }
+    },
+    {
+      "type": "row",
+      "title": "Flink · raw 적재 잡",
+      "collapsed": false,
+      "id": 7,
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "잡 가동 시간",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_job_uptime{job_name=\"skill_eval_raw_ingest\"})",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 8,
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 4,
+        "h": 6
+      }
+    },
+    {
+      "type": "stat",
+      "title": "완료 체크포인트",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_job_numberOfCompletedCheckpoints{job_name=\"skill_eval_raw_ingest\"})",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 9,
+      "gridPos": {
+        "x": 4,
+        "y": 13,
+        "w": 4,
+        "h": 6
+      }
+    },
+    {
+      "type": "stat",
+      "title": "실패 체크포인트",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_job_numberOfFailedCheckpoints{job_name=\"skill_eval_raw_ingest\"})",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 10,
+      "gridPos": {
+        "x": 8,
+        "y": 13,
+        "w": 4,
+        "h": 6
+      }
+    },
+    {
+      "type": "stat",
+      "title": "재시작 횟수",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_job_numRestarts{job_name=\"skill_eval_raw_ingest\"})",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 11,
+      "gridPos": {
+        "x": 12,
+        "y": 13,
+        "w": 4,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "마지막 체크포인트 소요 시간",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_job_lastCheckpointDuration{job_name=\"skill_eval_raw_ingest\"})",
+          "instant": false,
+          "range": true,
+          "legendFormat": "duration",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 12,
+      "gridPos": {
+        "x": 16,
+        "y": 13,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "처리 속도 (Kafka에서 읽은 레코드)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(flink_taskmanager_job_task_operator_numRecordsOut{job_name=\"skill_eval_raw_ingest\",operator_name=~\"Source.*\"}[1m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "records/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 13,
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 12,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "누적 처리 레코드",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(flink_taskmanager_job_task_operator_numRecordsOut{job_name=\"skill_eval_raw_ingest\",operator_name=~\"Source.*\"})",
+          "instant": false,
+          "range": true,
+          "legendFormat": "records",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "description": "잡을 재제출하면 0부터 다시 센다.",
+      "id": 14,
+      "gridPos": {
+        "x": 12,
+        "y": 19,
+        "w": 12,
+        "h": 6
+      }
+    },
+    {
+      "type": "row",
+      "title": "Flink · JobManager / TaskManager",
+      "collapsed": false,
+      "id": 15,
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "TaskManager 수",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_numRegisteredTaskManagers)",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 16,
+      "gridPos": {
+        "x": 0,
+        "y": 26,
+        "w": 4,
+        "h": 5
+      }
+    },
+    {
+      "type": "stat",
+      "title": "태스크 슬롯 (전체 / 빈 슬롯)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_taskSlotsTotal)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "total",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max(flink_jobmanager_taskSlotsAvailable)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "available",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "id": 17,
+      "gridPos": {
+        "x": 4,
+        "y": 26,
+        "w": 6,
+        "h": 5
+      }
+    },
+    {
+      "type": "stat",
+      "title": "실행 중인 잡",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_numRunningJobs)",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 18,
+      "gridPos": {
+        "x": 10,
+        "y": 26,
+        "w": 4,
+        "h": 5
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU 사용률",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_Status_JVM_CPU_Load)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "JobManager",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_JVM_CPU_Load)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "TaskManager {{tm_id}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 19,
+      "gridPos": {
+        "x": 14,
+        "y": 26,
+        "w": 10,
+        "h": 5
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "JobManager 힙 메모리",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_Status_JVM_Memory_Heap_Used)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "used",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max(flink_jobmanager_Status_JVM_Memory_Heap_Max)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "max",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 20,
+      "gridPos": {
+        "x": 0,
+        "y": 31,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "TaskManager 힙 메모리",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_JVM_Memory_Heap_Used)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "used {{tm_id}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_JVM_Memory_Heap_Max)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "max {{tm_id}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 21,
+      "gridPos": {
+        "x": 8,
+        "y": 31,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "TaskManager 관리 메모리 · 네트워크 버퍼",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_Flink_Memory_Managed_Used)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "managed used",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_Flink_Memory_Managed_Total)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "managed total",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_Shuffle_Netty_UsedMemory)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "network used",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "C"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_Shuffle_Netty_TotalMemory)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "network total",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "D"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 22,
+      "gridPos": {
+        "x": 16,
+        "y": 31,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "GC 시간 (초당 ms)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_Status_JVM_GarbageCollector_All_TimeMsPerSecond)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "JobManager",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_JVM_GarbageCollector_All_TimeMsPerSecond)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "TaskManager {{tm_id}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 23,
+      "gridPos": {
+        "x": 0,
+        "y": 37,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "스레드 수",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_Status_JVM_Threads_Count)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "JobManager",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_JVM_Threads_Count)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "TaskManager {{tm_id}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "id": 24,
+      "gridPos": {
+        "x": 8,
+        "y": 37,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "메타스페이스",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(flink_jobmanager_Status_JVM_Memory_Metaspace_Used)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "JobManager",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "max by (tm_id) (flink_taskmanager_Status_JVM_Memory_Metaspace_Used)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "TaskManager {{tm_id}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 25,
+      "gridPos": {
+        "x": 16,
+        "y": 37,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "row",
+      "title": "S3 raw · CloudWatch (하루 단위 갱신)",
+      "collapsed": false,
+      "id": 26,
+      "gridPos": {
+        "x": 0,
+        "y": 43,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "버킷 크기",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "cloudwatch"
+      },
+      "targets": [
+        {
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "namespace": "AWS/S3",
+          "metricName": "BucketSizeBytes",
+          "dimensions": {
+            "BucketName": "$bucket",
+            "StorageType": "StandardStorage"
+          },
+          "statistic": "Average",
+          "period": "86400",
+          "region": "default",
+          "matchExact": true,
+          "label": "BucketSizeBytes",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "description": "S3 스토리지 메트릭은 하루 한 번 갱신된다. 시간 범위를 7일 이상으로 넓혀야 보인다.",
+      "id": 27,
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 12,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "객체 수",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "cloudwatch"
+      },
+      "targets": [
+        {
+          "queryMode": "Metrics",
+          "metricQueryType": 0,
+          "metricEditorMode": 0,
+          "namespace": "AWS/S3",
+          "metricName": "NumberOfObjects",
+          "dimensions": {
+            "BucketName": "$bucket",
+            "StorageType": "AllStorageTypes"
+          },
+          "statistic": "Average",
+          "period": "86400",
+          "region": "default",
+          "matchExact": true,
+          "label": "NumberOfObjects",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "id": 28,
+      "gridPos": {
+        "x": 12,
+        "y": 44,
+        "w": 12,
+        "h": 6
+      }
+    },
+    {
+      "type": "row",
+      "title": "OTel Collector",
+      "collapsed": false,
+      "id": 29,
+      "gridPos": {
+        "x": 0,
+        "y": 50,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "가동 시간",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "max(otelcol_process_uptime)",
+          "instant": true,
+          "range": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "id": 30,
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 4,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "수신 span",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_receiver_accepted_spans[1m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "accepted/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(otelcol_receiver_refused_spans[1m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "refused/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "description": "현재 데모 에이전트는 Kafka로 직접 보내므로, 외부 서비스가 OTLP로 붙기 전까지는 비어 있다.",
+      "id": 31,
+      "gridPos": {
+        "x": 4,
+        "y": 51,
+        "w": 10,
+        "h": 6
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka 전송 span",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_exporter_sent_spans[1m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "sent/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(otelcol_exporter_send_failed_spans[1m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "failed/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 32,
+      "gridPos": {
+        "x": 14,
+        "y": 51,
+        "w": 10,
+        "h": 6
+      }
+    },
+    {
+      "type": "row",
+      "title": "트레이스 · Tempo",
+      "collapsed": false,
+      "id": 33,
+      "gridPos": {
+        "x": 0,
+        "y": 57,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Tempo 수신 span",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(tempo_distributor_spans_received_total[1m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "spans/s",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "options": {},
+      "id": 34,
+      "gridPos": {
+        "x": 0,
+        "y": 58,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "type": "table",
+      "title": "최근 트레이스",
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "targets": [
+        {
+          "queryType": "traceql",
+          "query": "{resource.service.name != \"\"}",
+          "limit": 20,
+          "tableType": "traces",
+          "datasource": {
+            "type": "tempo",
+            "uid": "tempo"
+          },
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "description": "Trace ID를 누르면 span 워터폴이 열린다.",
+      "id": 35,
+      "gridPos": {
+        "x": 8,
+        "y": 58,
+        "w": 16,
+        "h": 8
+      }
+    }
+  ]
+}

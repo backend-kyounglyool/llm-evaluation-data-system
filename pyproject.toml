@@ -1,0 +1,42 @@
+[project]
+name = "skill-eval"
+version = "0.1.0"
+description = "에이전트 스킬 로그 적재 + 평가 시스템"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "pandas>=2.2",
+    "pyarrow>=16.0",
+    "duckdb>=1.0",
+    "scikit-learn>=1.4",
+    "opentelemetry-sdk>=1.25",
+    "opentelemetry-exporter-otlp-proto-http>=1.25",
+    "fastmcp>=2.0",
+    "streamlit>=1.36",
+    "python-dotenv>=1.0",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+kafka = ["confluent-kafka>=2.4"]
+llm = ["anthropic>=0.34"]
+s3 = ["fsspec>=2024.6", "s3fs>=2024.6"]
+snowflake = ["snowflake-connector-python>=3.10"]
+dev = ["pytest>=8.0"]
+distill = ["transformers>=4.42", "torch>=2.3", "datasets>=2.20", "accelerate>=0.31"]
+
+[tool.setuptools]
+packages = [
+    "common",
+    "agent",
+    "telemetry",
+    "pipeline",
+    "eval",
+    "distill",
+    "monitoring",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

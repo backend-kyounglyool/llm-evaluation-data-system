@@ -1,0 +1,100 @@
+{"id": "g-0001", "query": "강남역 2호선 몇 분 뒤에 와?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0002", "query": "홍대입구역 지하철 언제 도착해?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0003", "query": "지금 신촌역 도착 정보 알려줘", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0004", "query": "사당역 4호선 다음 열차 몇 분 남았어?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0005", "query": "서울역에서 지하철 곧 와?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0006", "query": "잠실역 상행 도착 시간 알려줘", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0007", "query": "지하철 도착 알림 좀, 성수역", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0008", "query": "교대역 열차 언제 들어와?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0009", "query": "강남에서 홍대까지 지하철로 어떻게 가?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0010", "query": "서울역까지 환승 몇 번 해야 돼?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0011", "query": "잠실에서 여의도 가는 지하철 노선 알려줘", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0012", "query": "집에서 회사까지 지하철 이동 경로 짜줘", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0013", "query": "김포공항 가려면 몇 호선 타야 해?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0014", "query": "강북에서 강남 지하철 환승 루트 알려줘", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0015", "query": "신분당선으로 판교 가는 방법 알려줘", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0016", "query": "지하철로 인천 가는 제일 빠른 길?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0017", "query": "지금 서울 날씨 어때?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0018", "query": "오늘 날씨 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0019", "query": "밖에 지금 추워?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0020", "query": "현재 기온 몇 도야?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0021", "query": "부산 날씨 지금 어때?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0022", "query": "미세먼지 오늘 심해?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0023", "query": "지금 밖에 비 오고 있어?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0024", "query": "오늘 서울 날씨 맑아?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0025", "query": "내일 날씨 어때?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0026", "query": "주말에 비 온대?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0027", "query": "모레 서울 기온 예보 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0028", "query": "이번 주 날씨 예보 보여줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0029", "query": "내일 우산 챙겨야 해?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0030", "query": "다음 주 화요일 날씨 미리 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0031", "query": "내일 아침에 눈 온대?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0032", "query": "3일치 일기예보 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0033", "query": "이번 주 볼만한 공연 추천해줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0034", "query": "대학로 연극 뭐 해?", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0035", "query": "뮤지컬 위키드 공연 정보 찾아줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0036", "query": "요즘 콘서트 뭐 있어?", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0037", "query": "예술의전당 공연 일정 검색해줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0038", "query": "클래식 공연 찾아줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0039", "query": "국립발레단 공연 언제 해?", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0040", "query": "홍대 근처 인디밴드 공연 있어?", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0041", "query": "아침 브리핑 해줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0042", "query": "출근길 정보 모아서 알려줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0043", "query": "아침에 나갈 준비할 때 필요한 거 알려줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0044", "query": "출근 전에 챙길 거 브리핑 해줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0045", "query": "아침마다 보는 요약 좀 띄워줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0046", "query": "주말에 볼 공연 추천해줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0047", "query": "이번 주말 나들이 계획 짜줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0048", "query": "주말 문화생활 계획 좀 세워줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0049", "query": "토요일에 뭐 볼지 추천해줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0050", "query": "주말에 공연 보러 가게 일정 짜줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0051", "query": "2호선 타야 되는데 열차 금방 와?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0052", "query": "지하철 기다리는 중인데 얼마나 남았어?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0053", "query": "강남역에서 성수역까지 뭐 타고 가?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0054", "query": "역에 거의 다 왔는데 지하철 놓칠까?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0055", "query": "환승 없이 갈 수 있는 방법 있어?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0056", "query": "다음 차 언제야?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0057", "query": "지하철 타고 공항 가는 길 알려줘", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_route"}
+{"id": "g-0058", "query": "지하철 지금 어디쯤이야?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0059", "query": "내일 비 와?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0060", "query": "비 오니?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0061", "query": "주말 날씨 어때?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0062", "query": "날씨 좀", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0063", "query": "다음 주 날씨 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0064", "query": "지금 몇 도?", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0065", "query": "내일 뭐 입을지 날씨 보고 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0066", "query": "현재 날씨 상태 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0067", "query": "주말에 데이트하기 좋은 공연 찾고 날씨도 봐줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0068", "query": "공연 하나만 골라줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0069", "query": "주말 공연 나들이 어때?", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0070", "query": "평일 저녁에 볼 공연 찾아줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0071", "query": "토요일 공연 보고 싶은데 계획 짜줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 2}, "expected_skill": "weekend_performance"}
+{"id": "g-0072", "query": "지금 예매 가능한 공연 알려줘", "gold": {"intent": "문화_탐색", "out_of_scope": false, "complexity": 1}, "expected_skill": "performance_search"}
+{"id": "g-0073", "query": "출근 준비 도와줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0074", "query": "아침에 보려고 하는데 지금 날씨 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_now"}
+{"id": "g-0075", "query": "오늘 아침 출근길 어떤지 알려줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0076", "query": "출근해야 하는데 지하철 언제 와?", "gold": {"intent": "교통_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "subway_arrival"}
+{"id": "g-0077", "query": "날씨랑 지하철 같이 알려줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0078", "query": "모레 아침 브리핑 예약해줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0079", "query": "출근 전에 내일 날씨 미리 알려줘", "gold": {"intent": "날씨_조회", "out_of_scope": false, "complexity": 1}, "expected_skill": "weather_forecast"}
+{"id": "g-0080", "query": "아침에 필요한 정보 다 모아줘", "gold": {"intent": "복합_브리핑", "out_of_scope": false, "complexity": 2}, "expected_skill": "commute_briefing"}
+{"id": "g-0081", "query": "비트코인 시세 알려줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0082", "query": "김치찌개 레시피 알려줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0083", "query": "이 문장 영어로 번역해줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0084", "query": "엄마 생신 선물 뭐가 좋을까?", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0085", "query": "넷플릭스에서 볼만한 드라마 추천해줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0086", "query": "환율 지금 얼마야?", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0087", "query": "근처 맛집 알려줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0088", "query": "로또 번호 추천해줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0089", "query": "파이썬 리스트 정렬 어떻게 해?", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0090", "query": "축구 경기 결과 알려줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0091", "query": "책 추천 좀 해줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0092", "query": "오늘의 운세 봐줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0093", "query": "피자 주문해줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0094", "query": "노래 틀어줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0095", "query": "주식 계좌 개설 방법 알려줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0096", "query": "강아지 사료 추천해줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0097", "query": "영화 날씨의 아이 줄거리 알려줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0098", "query": "지하철 노선도 역사에 대해 리포트 써줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0099", "query": "아침형 인간 되는 법 알려줘", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}
+{"id": "g-0100", "query": "세탁기 에러 코드 E3 뭐야?", "gold": {"intent": "기타", "out_of_scope": true, "complexity": 1}, "expected_skill": "none"}

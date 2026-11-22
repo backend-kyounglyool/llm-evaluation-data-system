@@ -1,0 +1,36 @@
+# OTel Collector: OTLP 수신 → Kafka(agent-events) 전달.
+# 앱 내부 Span Processor가 본문을 이미 제거한 뒤이므로 여기엔 지표·태그만 도달한다.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 2s
+  # 2차 방어선: 혹시 남아 있는 본문 속성을 collector에서도 제거
+  attributes/strip-body:
+    actions:
+      - key: request.body
+        action: delete
+      - key: response.body
+        action: delete
+
+exporters:
+  kafka:
+    brokers: [kafka:9092]
+    topic: agent-events
+    encoding: otlp_json
+
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888   # Prometheus가 수집하는 collector 자체 메트릭
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/strip-body, batch]
+      exporters: [kafka]

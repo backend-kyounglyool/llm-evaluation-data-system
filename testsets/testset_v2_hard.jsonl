@@ -1,0 +1,90 @@
+{"id": "h-0001", "query": "지금 역삼역인데 얼마나 기다려야 돼?", "expected": "subway_arrival", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0002", "query": "잠실역 8호선 열차 들어오고 있어?", "expected": "subway_arrival", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0003", "query": "사당역 4호선 당고개행 몇 분 남았어?", "expected": "subway_arrival", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0004", "query": "합정역 도착했는데 바로 탈 수 있을까?", "expected": "subway_arrival", "case_type": "confusable", "split": "val", "intent": "교통_조회"}
+{"id": "h-0005", "query": "출근길인데 신도림역 1호선 지금 오는 중이야?", "expected": "subway_arrival", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0006", "query": "비 오는데 서울역 열차 곧 와?", "expected": "subway_arrival", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0007", "query": "건대입구역 7호선 방금 떠났어? 다음 건 언제야?", "expected": "subway_arrival", "case_type": "confusable", "split": "val", "intent": "교통_조회"}
+{"id": "h-0008", "query": "왕십리역 2호선 도착 전광판 정보 대신 봐줘", "expected": "subway_arrival", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0009", "query": "강남에서 홍대까지 몇 번 갈아타?", "expected": "subway_route", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0010", "query": "여의도역에서 잠실역 가는 제일 빠른 노선 뭐야?", "expected": "subway_route", "case_type": "confusable", "split": "val", "intent": "교통_조회"}
+{"id": "h-0011", "query": "신촌역에서 삼성역 가려면 어디서 환승해?", "expected": "subway_route", "case_type": "confusable", "split": "val", "intent": "교통_조회"}
+{"id": "h-0012", "query": "서울역에서 김포공항까지 지하철로 얼마나 걸려?", "expected": "subway_route", "case_type": "confusable", "split": "val", "intent": "교통_조회"}
+{"id": "h-0013", "query": "내일 아침에 판교역에서 광화문역 가는 길 미리 알려줘", "expected": "subway_route", "case_type": "confusable", "split": "val", "intent": "교통_조회"}
+{"id": "h-0014", "query": "주말에 공연 보러 혜화역 가야 하는데 사당역에서 어떻게 가?", "expected": "subway_route", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0015", "query": "2호선 타고 가다가 9호선으로 갈아타려면 어느 역이야?", "expected": "subway_route", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0016", "query": "수원역에서 인천공항까지 지하철 경로 짜줘", "expected": "subway_route", "case_type": "confusable", "split": "train", "intent": "교통_조회"}
+{"id": "h-0017", "query": "밖에 지금 우산 써야 돼?", "expected": "weather_now", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0018", "query": "지금 창문 열어도 될 만큼 선선해?", "expected": "weather_now", "case_type": "confusable", "split": "val", "intent": "날씨_조회"}
+{"id": "h-0019", "query": "지금 나가려는데 겉옷 필요해?", "expected": "weather_now", "case_type": "confusable", "split": "val", "intent": "날씨_조회"}
+{"id": "h-0020", "query": "부산은 현재 바람 많이 불어?", "expected": "weather_now", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0021", "query": "방금 천둥 친 것 같은데 지금 비 오는 거 맞아?", "expected": "weather_now", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0022", "query": "지하철역까지 걸어갈 건데 지금 밖에 더워?", "expected": "weather_now", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0023", "query": "출근하는 중인데 지금 기온 몇 도야?", "expected": "weather_now", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0024", "query": "이따 퇴근할 때 비 올까?", "expected": "weather_forecast", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0025", "query": "오늘 밤에 기온 많이 떨어져?", "expected": "weather_forecast", "case_type": "confusable", "split": "val", "intent": "날씨_조회"}
+{"id": "h-0026", "query": "모레 제주도 가는데 우산 챙겨야 해?", "expected": "weather_forecast", "case_type": "confusable", "split": "val", "intent": "날씨_조회"}
+{"id": "h-0027", "query": "이번 주 빨래하기 좋은 날 언제야?", "expected": "weather_forecast", "case_type": "confusable", "split": "val", "intent": "날씨_조회"}
+{"id": "h-0028", "query": "토요일에 야외 결혼식 가는데 날씨 괜찮을까?", "expected": "weather_forecast", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0029", "query": "주말에 캠핑 가도 될 날씨야?", "expected": "weather_forecast", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0030", "query": "내일 출근길에 눈 와?", "expected": "weather_forecast", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0031", "query": "다음 주 초에 한파 온다던데 진짜야?", "expected": "weather_forecast", "case_type": "confusable", "split": "train", "intent": "날씨_조회"}
+{"id": "h-0032", "query": "나가기 전에 우산 필요한지랑 2호선 언제 오는지 한 번에 알려줘", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0033", "query": "오늘 출근길 브리핑 부탁해", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0034", "query": "아침 출근 전에 날씨하고 지하철 상황 묶어서 정리해줘", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0035", "query": "출근 준비 중이야. 밖에 추운지랑 강남역 열차 도착 같이 봐줘", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0036", "query": "매일 아침 보던 그거 오늘도 해줘, 날씨랑 지하철", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0037", "query": "출근하려고 집 나서기 직전인데 챙겨야 할 정보 한 번에 줘", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0038", "query": "지금 기온이랑 홍대입구역 도착 정보 둘 다 알려줘, 출근해야 돼", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0039", "query": "요즘 대학로에서 하는 연극 뭐 있어?", "expected": "performance_search", "case_type": "confusable", "split": "train", "intent": "문화_탐색"}
+{"id": "h-0040", "query": "뮤지컬 위키드 아직 공연해?", "expected": "performance_search", "case_type": "confusable", "split": "val", "intent": "문화_탐색"}
+{"id": "h-0041", "query": "이번 달 재즈 콘서트 일정 찾아줘", "expected": "performance_search", "case_type": "confusable", "split": "val", "intent": "문화_탐색"}
+{"id": "h-0042", "query": "아이랑 볼 만한 어린이 뮤지컬 검색해줘", "expected": "performance_search", "case_type": "confusable", "split": "train", "intent": "문화_탐색"}
+{"id": "h-0043", "query": "주말에 하는 클래식 공연 목록만 보여줘", "expected": "performance_search", "case_type": "confusable", "split": "train", "intent": "문화_탐색"}
+{"id": "h-0044", "query": "비 오는 날 보기 좋은 실내 공연 찾아줘", "expected": "performance_search", "case_type": "confusable", "split": "val", "intent": "문화_탐색"}
+{"id": "h-0045", "query": "예술의전당에서 하는 오페라 있어?", "expected": "performance_search", "case_type": "confusable", "split": "train", "intent": "문화_탐색"}
+{"id": "h-0046", "query": "토요일에 야외 페스티벌 가려는데 공연이랑 날씨 같이 봐줘", "expected": "weekend_performance", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0047", "query": "이번 주말 공연 보러 갈 건데 비 오면 실내로 바꾸게 예보랑 같이 추천해줘", "expected": "weekend_performance", "case_type": "confusable", "split": "val", "intent": "복합_브리핑"}
+{"id": "h-0048", "query": "일요일 나들이로 볼 공연 하나랑 그날 날씨 정리해줘", "expected": "weekend_performance", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0049", "query": "주말 문화생활 계획 좀 세워줘, 공연 위주로 날씨도 고려해서", "expected": "weekend_performance", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0050", "query": "토요일 저녁 뮤지컬 보고 싶은데 그날 날씨까지 감안해서 골라줘", "expected": "weekend_performance", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0051", "query": "이번 주말 공연 나들이 코스 짜줘", "expected": "weekend_performance", "case_type": "confusable", "split": "train", "intent": "문화_탐색"}
+{"id": "h-0052", "query": "강남역 가는 버스 언제 와?", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0053", "query": "서울에서 부산 가는 KTX 시간표 알려줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0054", "query": "강남역까지 택시 잡아줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0055", "query": "주말에 등산 코스 추천해줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0056", "query": "주말에 볼 영화 추천해줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0057", "query": "지하철에서 지갑 잃어버렸는데 어디에 신고해?", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0058", "query": "작년 여름 평균 기온이 몇 도였어?", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0059", "query": "뮤지컬 티켓 환불 규정 알려줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0060", "query": "아침에 일어나기 좋은 알람 앱 추천해줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0061", "query": "지하철 정기권 가격 얼마야?", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0062", "query": "기후 변화가 한반도 날씨에 미치는 영향 설명해줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0063", "query": "출근하기 싫은데 연차 사유 뭐라고 쓸까?", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0064", "query": "주말 가족 여행 일정 짜줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0065", "query": "콘서트장 근처 주차장 알려줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0066", "query": "주말에 갈 만한 맛집 예약해줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0067", "query": "주말 캠핑장 예약 가능한 곳 찾아줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0068", "query": "토요일 친구 결혼식 축의금 얼마가 적당해?", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0069", "query": "일요일에 문 여는 약국 알려줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0070", "query": "주말 알바 구하는 법 알려줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0071", "query": "이번 주말 프로야구 경기 일정 알려줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0072", "query": "주말에 아이랑 갈 키즈카페 추천해줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0073", "query": "토요일 영화관 상영시간표 알려줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0074", "query": "이번 주말 당일치기 여행지 추천해줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0075", "query": "출근길에 들을 팟캐스트 추천해줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0076", "query": "아침 식단 추천해줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0077", "query": "회사까지 자전거로 가는 길 알려줘", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0078", "query": "출근 시간대 버스 배차 간격 알려줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0079", "query": "비 오는 날 듣기 좋은 노래 추천해줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0080", "query": "태풍 이름은 어떻게 정해?", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0081", "query": "지하철 2호선은 몇 년도에 개통했어?", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0082", "query": "지하철 와이파이 연결하는 법 알려줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0083", "query": "공연 보러 갈 때 입을 옷 추천해줘", "expected": "none", "case_type": "negative", "split": "val", "intent": "기타"}
+{"id": "h-0084", "query": "뮤지컬 배우가 되려면 어떻게 해야 해?", "expected": "none", "case_type": "negative", "split": "train", "intent": "기타"}
+{"id": "h-0085", "query": "일요일에 하는 연극 검색해줘", "expected": "performance_search", "case_type": "confusable", "split": "train", "intent": "문화_탐색"}
+{"id": "h-0086", "query": "이번 주말 콘서트 뭐 하는지만 알려줘", "expected": "performance_search", "case_type": "confusable", "split": "val", "intent": "문화_탐색"}
+{"id": "h-0087", "query": "주말에 비 안 오면 야외 공연 보려는데 뭐가 좋을까?", "expected": "weekend_performance", "case_type": "confusable", "split": "val", "intent": "복합_브리핑"}
+{"id": "h-0088", "query": "토요일 날씨 보고 볼 만한 공연 추천해줘", "expected": "weekend_performance", "case_type": "confusable", "split": "val", "intent": "복합_브리핑"}
+{"id": "h-0089", "query": "출근길 날씨랑 열차 시간 한꺼번에 알려줘", "expected": "commute_briefing", "case_type": "confusable", "split": "train", "intent": "복합_브리핑"}
+{"id": "h-0090", "query": "지금 날씨랑 강남역 2호선 도착 시간 같이 알려줘", "expected": "commute_briefing", "case_type": "confusable", "split": "val", "intent": "복합_브리핑"}

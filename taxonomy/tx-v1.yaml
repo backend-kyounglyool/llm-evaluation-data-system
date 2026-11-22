@@ -1,0 +1,28 @@
+taxonomy_version: tx-v1
+questions:
+  intent:
+    type: choice
+    instructions: "What is the user's primary intent in `request`?"
+    options:
+      교통_조회: "Real-time arrival or route of public transit"
+      날씨_조회: "Current weather or forecast"
+      문화_탐색: "Finding performances or events"
+      일정_정리: "Summarizing or planning a schedule"
+      기타: "None of the above"
+  out_of_scope:
+    type: bool
+    instructions: "Is `request` outside what the available tools can handle?"
+  skill_fit:
+    type: bool
+    instructions: "Does `selected_skill` fit `request`, given `skill_descriptions`?"
+  complexity:
+    type: score
+    instructions: "How many distinct steps does `request` require?"
+    scale: [1, 5]
+    # Jev score 질문의 criteria. 위치가 점수(0..4)이고 scale[0]을 더해 1..5로 기록한다.
+    levels:
+      - "One simple lookup"
+      - "Two lookups or one lookup with a simple condition"
+      - "Three or more lookups combined"
+      - "Multi-step planning across several tools"
+      - "Complex multi-step planning with dependencies"

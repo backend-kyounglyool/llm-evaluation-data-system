@@ -1,0 +1,109 @@
+# skill-eval 전역 설정
+# 모든 외부 의존은 여기서 켠다. 기본값은 전부 로컬/모의(mock) 모드.
+
+llm:
+  # mock | claude
+  provider: claude
+  model: claude-haiku-5-5
+  max_tokens: 16000   # 사고 토큰 포함 상한. 낮추면 응답이 중간에 잘릴 수 있다
+  # ANTHROPIC_API_KEY 환경변수 사용
+
+transport:
+  # kafka(기본, make infra-up 필요) | file(docker 없이 로컬 JSONL)
+  backend: kafka
+  file:
+    dir: data/events
+  kafka:
+    bootstrap_servers: localhost:19092   # 배포 시 MSK 부트스트랩으로 교체
+    topic: agent-events
+
+ingest:
+  # Kafka → raw 적재 엔진. flink(상시 스트리밍 잡) | python(배치 drain)
+  # transport.backend: file이면 이 값과 무관하게 python consumer를 쓴다.
+  engine: flink
+  flink:
+    rest_url: http://localhost:8081
+    job_name: skill-eval-raw-ingest
+    bootstrap_servers: kafka:9092   # Flink 컨테이너에서 보는 브로커 주소. 배포 시 MSK 부트스트랩
+    group_id: skill-eval-flink
+    checkpoint_interval_s: 10       # 체크포인트·파일 롤링 주기. 적재 지연은 최대 약 2배 + 5초
+    parallelism: 1
+
+storage:
+  # raw 저장 위치. 운영: s3://<bucket>/raw (consumer가 S3에 직접 적재, fsspec)
+  # cleansed/quarantine 로컬 경로는 DuckDB 개발 루프용 — 운영 cleansed는 Snowflake 테이블
+  raw: s3://skill-eval-lake-740255825084/raw
+  cleansed: data/cleansed
+  quarantine: data/quarantine
+
+mart:
+  # 로컬 분석·대시보드는 DuckDB, 서빙·공유용 mart는 Snowflake(make snowflake)로 이중 운용
+  backend: duckdb
+  duckdb_path: data/mart.duckdb
+  snowflake:
+    account: PMODJNM-KM82335
+    database: SKILL_EVAL
+    schema: MART
+    warehouse: COMPUTE_WH
+    raw_stage: SKILL_EVAL_RAW_STAGE  # s3://<bucket>/raw 위 external stage (snowflake_setup.sql로 구성)
+    # SNOWFLAKE_USER / SNOWFLAKE_PASSWORD 환경변수 사용
+
+labeler:
+  taxonomy: taxonomy/tx-v2.yaml
+  # 캐스케이드: jev → (p < tau) → llm
+  cascade:
+    tau: 0.75
+    target_precision: 0.90  # τ 선택 시 Jev 유지분이 만족해야 할 목표 정확도
+  # 라벨링을 요청 경로에서 분리: 프로세스 내부 큐 + 워커 스레드. false면 span 종료 시 동기 호출
+  async:
+    enabled: true
+    workers: 4
+    queue_size: 1000   # 가득 차면 요청을 막지 않고 태그 없이 이벤트 발행
+  jev:
+    # mock | http (TypeSafe AI Jev, System One API)
+    provider: http
+    model: jev-1.14.0      # τ를 튜닝한 버전에 고정. 별칭 jev-latest는 릴리스 때 답이 바뀔 수 있음
+    endpoint: https://api.typesafe.ai/v1/systemone
+    api_key_env: JEV_API_KEY
+    price_per_mtok_usd: 0.042   # 입력 토큰 단가(출력 무료). 실측 cost_usd = input_tokens × 단가
+    timeout_s: 20
+    max_retries: 4              # 429/529는 지수 백오프로 재시도
+    cost_per_1k_usd: 0.05  # mock 모드 비용 가정치 (http 모드는 실측 사용)
+  llm_cost_per_1k_usd: 2.4
+
+tracing:
+  dir: data/traces        # 전체 span 트리(JSONL) 저장 위치 — 워터폴·플레임 그래프 원천
+  service: skill-eval-demo
+  # span 트리를 Tempo로도 전송(Grafana 트레이스 조회). 비우면 JSONL에만 기록
+  otlp_endpoint: http://localhost:4319/v1/traces
+  capture_body: false     # true면 로컬 디버깅용으로 trace span에만 본문 유지.
+                          # 이벤트(Kafka) 경로는 이 값과 무관하게 항상 본문 제거.
+
+selector:
+  skills_dir: agent/skills
+  # 선택 로그에 기록할 스킬 버전. 설명 개선 시 v2, v3...
+  skill_version: v1
+
+flaky_tool:
+  error_rate: 0.15
+  timeout_rate: 0.05
+
+improve_loop:
+  max_iterations: 3
+  min_val_accuracy_gain: 0.01   # 1%p 이상 상승해야 채택
+  max_recall_regression: 0.02   # 다른 스킬 recall 2%p 초과 하락 시 기각
+
+lifecycle:
+  keep:
+    min_success_rate: 0.95
+    min_selection_f1: 0.90
+  deactivate:
+    min_calls_recent_days: 3
+    recent_days: 14
+    cost_ratio_vs_alternative: 3.0
+
+distill:
+  base_model: klue/roberta-small
+  router:
+    light_tau: 0.80   # 경량 모델 확신도 임계값
+    jev_tau: 0.75     # Jev 확신도 임계값

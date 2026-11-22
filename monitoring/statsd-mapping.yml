@@ -1,0 +1,24 @@
+# Airflow StatsD 이름을 라벨이 붙은 Prometheus 메트릭으로 변환 (나머지는 기본 변환: 점 → 밑줄)
+mappings:
+  - match: 'airflow\.pool\.(open|queued|running|scheduled|deferred)_slots\.(.+)'
+    match_type: regex
+    name: airflow_pool_slots
+    labels:
+      state: "$1"
+      pool: "$2"
+  - match: 'airflow\.pool\.starving_tasks\.(.+)'
+    match_type: regex
+    name: airflow_pool_starving_tasks
+    labels:
+      pool: "$1"
+  - match: 'airflow\.dagrun\.duration\.(success|failed)\.(.+)'
+    match_type: regex
+    name: airflow_dagrun_duration
+    labels:
+      state: "$1"
+      dag_id: "$2"
+  - match: 'airflow\.dagrun\.schedule_delay\.(.+)'
+    match_type: regex
+    name: airflow_dagrun_schedule_delay
+    labels:
+      dag_id: "$1"
