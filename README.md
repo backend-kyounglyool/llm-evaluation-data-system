@@ -95,7 +95,11 @@ Collector(`http://localhost:4318/v1/traces`, gRPC는 4317)로 보내면 같은 �
 | `tokens.in`, `tokens.out`, `cost.usd` | 사용량·비용 |
 
 지연 시간은 span의 시작·종료 시각에서 계산한다. `ai.kind`·`gen_ai.*`만 있는 span(llm·thinking)은 이벤트가 되지 않는다.
-이 경로에는 라벨링(tags)이 없다. 본문(`request.body`)은 앱 밖으로 보내지 말아야 하고, 보내더라도 Collector가 지운다.
+이 경로에는 라벨링(tags)이 없다.
+
+Collector는 같은 span을 Tempo에도 보내므로 Grafana의 트레이스 화면에서 바로 볼 수 있다.
+본문(`request.body`)을 실어 보내면 **Tempo에만** 남는다(로컬 디스크, 7일 보관). Kafka로 가는 쪽은 Collector가 항상 지우므로
+S3·Snowflake에는 본문이 가지 않는다.
 
 ## 빠른 시작 (로컬, 외부 키 불필요)
 
