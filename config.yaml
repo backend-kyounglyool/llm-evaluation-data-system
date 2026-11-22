@@ -17,6 +17,11 @@ transport:
     bootstrap_servers: 127.0.0.1:19092   # 배포 시 MSK 부트스트랩으로 교체
     topic: agent-events
 
+# 외부 앱이 OTel Collector로 보낸 span을 AgentEvent로 바꾸는 브리지 (pipeline/otel_bridge.py)
+otel_bridge:
+  topic: otel-spans            # Collector의 kafka exporter가 쓰는 토픽
+  group_id: skill-eval-otel-bridge
+
 ingest:
   # Kafka → raw 적재 엔진. flink(상시 스트리밍 잡) | python(배치 drain)
   # transport.backend: file이면 이 값과 무관하게 python consumer를 쓴다.

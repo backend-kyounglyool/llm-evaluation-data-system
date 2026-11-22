@@ -125,6 +125,23 @@ services:
       kafka:
         condition: service_healthy
 
+  # Collector가 쓴 OTLP span(otel-spans)을 AgentEvent로 바꿔 agent-events에 넣는다
+  otel-bridge:
+    build:
+      context: pipeline
+      dockerfile: otel_bridge.Dockerfile
+    image: skill-eval-otel-bridge:1
+    restart: unless-stopped
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    volumes:   # 필요한 코드만 마운트한다 (.env의 자격증명은 이 컨테이너에 필요 없다)
+      - ./common:/opt/skill-eval/common:ro
+      - ./pipeline:/opt/skill-eval/pipeline:ro
+      - ./config.yaml:/opt/skill-eval/config.yaml:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
+
   # ── 모니터링: Prometheus + Grafana(http://localhost:3001) + Tempo ──
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.8.0

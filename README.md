@@ -75,8 +75,27 @@ with request_span(query, run_id="live") as req:
 ```
 
 이 다섯 span만 쓰면 트레이스(워터폴·플레임)와 이벤트(라벨링 포함)가 모두 자동 적재된다.
-비(非)Python 서버(NestJS·Spring)는 같은 속성 규약(`ai.kind`, `event.type`, `gen_ai.*`)으로
-OTel span을 쏘고 Collector를 경유시키면 동일 파이프라인에 합류한다.
+### 다른 프로세스·다른 언어의 앱 (OTel Collector 경유)
+
+이 SDK를 프로세스 안에 넣을 수 없는 앱(별도 서비스, NestJS·Spring 등)은 OTel span을
+Collector(`http://localhost:4318/v1/traces`, gRPC는 4317)로 보내면 같은 파이프라인에 합류한다.
+
+```
+앱 ──OTLP──▶ otel-collector ──▶ Kafka otel-spans ──▶ otel-bridge ──▶ Kafka agent-events ──▶ (Flink 이후 동일)
+```
+
+`event.type`이 있는 span만 이벤트가 된다. 브리지가 읽는 속성:
+
+| 속성 | 뜻 |
+| --- | --- |
+| `event.type` | `request_done` · `skill_selected` · `tool_called` (필수) |
+| `run.id` | 트래픽 구분. 없으면 `live` |
+| `skill`, `tool`, `skill.version`, `expected.skill`, `test.id` | 이벤트의 같은 이름 필드 |
+| `status` | `ok` · `error` · `timeout`. 그 밖의 값은 `error` |
+| `tokens.in`, `tokens.out`, `cost.usd` | 사용량·비용 |
+
+지연 시간은 span의 시작·종료 시각에서 계산한다. `ai.kind`·`gen_ai.*`만 있는 span(llm·thinking)은 이벤트가 되지 않는다.
+이 경로에는 라벨링(tags)이 없다. 본문(`request.body`)은 앱 밖으로 보내지 말아야 하고, 보내더라도 Collector가 지운다.
 
 ## 빠른 시작 (로컬, 외부 키 불필요)
 
