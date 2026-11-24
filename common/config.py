@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -17,8 +18,30 @@ load_dotenv(PROJECT_ROOT / ".env")
 @lru_cache(maxsize=1)
 def load_config(path: str | None = None) -> dict[str, Any]:
     config_path = Path(path or os.environ.get("SKILL_EVAL_CONFIG", PROJECT_ROOT / "config.yaml"))
-    with open(config_path, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    config = yaml.safe_load(expand_env(config_path.read_text(encoding="utf-8")))
+    apply_overrides(config, os.environ.get("SKILL_EVAL_OVERRIDES", ""))
+    return config
+
+
+ENV_REFERENCE = re.compile(r"\$\{(\w+)(?::-([^}]*))?\}")
+
+
+def expand_env(text: str) -> str:
+    """${VAR} 또는 ${VAR:-기본값}을 환경변수로 치환. 계정·버킷처럼 배포마다 다른 값은 .env에 둔다."""
+    return ENV_REFERENCE.sub(lambda m: os.environ.get(m.group(1), m.group(2) or ""), text)
+
+
+def apply_overrides(config: dict[str, Any], spec: str) -> None:
+    """"llm.provider=mock,transport.backend=file" 형식으로 설정 일부를 덮어쓴다 (CI·일회성 실행용)."""
+    for item in filter(None, (part.strip() for part in spec.split(","))):
+        dotted_key, _, raw_value = item.partition("=")
+        *parents, leaf = dotted_key.strip().split(".")
+        node = config
+        for key in parents:
+            node = node[key]
+        if leaf not in node:
+            raise KeyError(f"SKILL_EVAL_OVERRIDES: config에 없는 키 {dotted_key}")
+        node[leaf] = yaml.safe_load(raw_value)
 
 
 def resolve_path(path: str) -> str:

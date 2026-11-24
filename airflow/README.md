@@ -39,7 +39,7 @@ docker compose --profile airflow exec airflow-scheduler airflow dags unpause ski
 StatsD는 `statsd-exporter`가 받아 Prometheus 형식으로 바꾼다(이름 매핑: `monitoring/statsd-mapping.yml`).
 
 사전 조건:
-1. `config.yaml` — `storage.raw: s3://<bucket>/raw`, `mart.snowflake.account` 입력
+1. `.env` — `SKILL_EVAL_RAW_URI=s3://<bucket>/raw`, `SNOWFLAKE_ACCOUNT` 입력
 2. `pipeline/snowflake_setup.sql` — storage integration + `SKILL_EVAL_RAW_STAGE` 생성 (1회)
 3. Kafka·Flink 기동 + 적재 잡 제출 (`make infra-up`)
 

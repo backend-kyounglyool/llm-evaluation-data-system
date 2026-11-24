@@ -3,26 +3,55 @@
 직접 만든 툴·스킬로 에이전트 트래픽을 생성하고, **본문 없이** 지표와 태그만 적재한 뒤,
 스킬 선택 정확도를 자동 평가하고 스킬 설명을 자동 개선해 PR로 제안하는 시스템.
 
-```
-Runner/내 앱 → Agent(스킬 선택) → MCP Tools(FastMCP)
-                   │
-             OTel Span Processor ── Jev 라벨러(캐스케이드) ── 본문 제거
-                   │
-             Kafka(agent-events)
-                   │
-             Flink 스트리밍 잡 (상시) ─▶ S3 raw(JSON, dt= 파티션)
-                   │  ┌─────────────── Airflow 배치 (skill_eval_elt, 매시) ───────────────┐
-                   └─▶│ S3 raw ─storage integration─▶ Snowflake raw_events(VARIANT)        │
-                      │   ─MERGE─▶ cleansed_events(+quarantine) ─▶ mart 5종 ─▶ 품질 체크   │
-                      └────────────────────────────────────────────────────────────────────┘
-                   │                                                   │
-                   └── (로컬 개발 루프: file → DuckDB) ── 대시보드 ◄───┬┘
-                                                                       └ 평가·개선·정리 Job → GitHub PR
+```mermaid
+flowchart LR
+  subgraph app["에이전트 프로세스"]
+    A["Runner / 내 앱"] --> S["스킬 선택기"]
+    S --> T["MCP Tools (FastMCP)"]
+    S -. span .-> P["Span Processor<br/>라벨링 후 본문 제거"]
+    L["Jev 라벨러 → LLM 캐스케이드"] --- P
+  end
+  P -->|"지표·태그만"| K[("Kafka")]
+  P -. OTLP .-> TP["Tempo"]
+  K --> F["Flink SQL 잡<br/>상시 적재"]
+  F --> R[("S3 raw<br/>dt= 파티션")]
+  subgraph af["Airflow · 매시"]
+    C["COPY INTO raw_events"] --> M["MERGE cleansed<br/>+ quarantine"] --> MT["mart"] --> Q["품질 체크"]
+  end
+  R -->|"external stage"| C
+  MT --> G["Grafana"]
+  MT --> E["평가 · 설명 개선 · 정리 판정"]
+  E -->|"PR 제안"| S
 ```
 
-핵심 설계: **원문(query)은 프로세스 밖으로 나가지 않는다.**
+로컬 개발 루프는 같은 코드 경로를 file → DuckDB로 돌린다 (`transport.backend: file`).
+
+핵심 설계: **원문(query)은 적재 경로(Kafka·S3·Snowflake)에 들어가지 않는다.**
 Span Processor가 본문으로 라벨링한 뒤 본문 속성을 삭제하고, 이벤트에는 태그·확률·지표만 담는다.
 `common/events.py`의 `assert_no_body()`가 전송 경계에서 이를 강제한다.
+본문이 남을 수 있는 곳은 디버깅용 트레이스 저장소(로컬 JSONL·Tempo)뿐이고, 기본은 꺼져 있다.
+
+## 핵심 수치
+
+전부 실제 외부 서비스(Jev API, Claude Haiku 5.5, S3, Snowflake)로 측정한 값이다. 모의(mock) 모드 수치는 [아래](#mock-모드-레퍼런스-결과)에 따로 둔다.
+
+| 항목 | 결과 | 조건 |
+| --- | --- | --- |
+| 적재 | 2,771건 정제, quarantine 0건, 재실행 시 중복 0건 | S3 → Snowflake, Airflow 매시 실행 |
+| 라벨러: Jev 단독 | intent 97% · $0.030/1k · 225ms | 골든셋 100건, taxonomy tx-v2 |
+| 라벨러: Claude Haiku 5.5 단독 | intent 99% · $0.219/1k · 1,868ms | 〃 |
+| 라벨러: 캐스케이드 (τ=0.75) | intent 99% · $0.047/1k · 382ms · 승급 5% | 〃 |
+| 3단 라우팅 (경량 → Jev → LLM) | LLM 호출 94% 감소, 정확도 97% (LLM 단독 99%) | 〃 |
+| 스킬 선택 (Haiku 5.5, v1 설명) | 99% / 95.4% | 기본 테스트셋 100건 / 어려운 테스트셋 65건 |
+| 설명 자동 개선 | val 93.9% → 100% | 어려운 테스트셋 val 33건. 제안만 하고 적용은 안 함 |
+| 비동기 라벨링 | 평가 100건 3분 54초 → 2분 02초 | 라벨링을 요청 경로에서 분리 |
+
+읽을 때 알아둘 한계:
+
+- 트래픽은 직접 만든 테스트셋으로 생성한 합성 데이터이고 규모가 작다. 스택 선택은 처리량이 아니라 운영 구성을 검증하려는 목적이다.
+- 골든셋 라벨은 규칙으로 만들고 LLM 검토를 거친 것으로, 사람이 라벨링한 것이 아니다.
+- 선택기·라벨러 정확도는 실행마다 2~4%p 흔들린다. 표는 1회 측정값이다.
+- 3단 라우팅의 비용 비교는 LLM 단독 단가를 $2.4/1k로 가정한 값이라 표에서 뺐다 (`reports/router.md`).
 
 ## 트레이스 (Datadog AI Observability 스타일)
 
@@ -48,7 +77,8 @@ LLM 호출·생각(thinking)·툴콜·라벨링 구간과 토큰·비용을 span
 | Airflow | Prometheus(StatsD·Flower), Airflow DB | 스케줄러 수, 워커 수, executor·풀 슬롯, 스케줄된 태스크, DAG 실행 시간·이력 (`make airflow-up` 필요) |
 | 평가 지표 (Snowflake mart) | Snowflake | 적재 건수, run별 선택 정확도, 스킬 사용 현황, intent 분포, 라벨러 비용 |
 
-- Snowflake 데이터소스는 커뮤니티 플러그인(미서명)이며 `.env`의 `SNOWFLAKE_USER`·`SNOWFLAKE_PRIVATE_KEY_PATH`로 접속한다.
+- Snowflake 데이터소스는 커뮤니티 플러그인(미서명)이며 `.env`의 `SNOWFLAKE_USER`·`SNOWFLAKE_PRIVATE_KEY_PATH`로,
+  조회 전용 롤 `SKILL_EVAL_READER`로 접속한다.
   mart 대시보드는 자동 새로고침이 꺼져 있다 — 열 때마다 웨어하우스가 깨어난다.
 - span 트리는 `tracing.otlp_endpoint`(기본 Tempo)로도 전송된다. 본문 정책은 trace 저장소와 동일(`capture_body`).
 - `mart_skill_lifecycle`은 DuckDB에만 있어 Grafana에는 없다 (Streamlit 대시보드에서 확인).
@@ -101,7 +131,7 @@ Collector는 같은 span을 Tempo에도 보내므로 Grafana의 트레이스 화
 본문(`request.body`)을 실어 보내면 **Tempo에만** 남는다(로컬 디스크, 7일 보관). Kafka로 가는 쪽은 Collector가 항상 지우므로
 S3·Snowflake에는 본문이 가지 않는다.
 
-## 빠른 시작 (로컬, 외부 키 불필요)
+## 빠른 시작
 
 ```bash
 make setup        # venv + 의존성
@@ -109,8 +139,12 @@ make demo         # 트래픽 생성 → 파이프라인 → 평가 → 설명 �
 make dashboard    # Streamlit 대시보드
 ```
 
-기본 구성: LLM은 키워드 기반 모의 선택기(mock), 전송은 **Apache Kafka**, raw 적재는 **Flink**(`make infra-up`,
-docker 없이 쓰려면 `transport.backend: file`), 저장은 로컬 디렉터리, mart는 DuckDB(+`make snowflake`).
+`config.yaml` 기본값은 실 서비스(Claude·Jev·Kafka·Flink)를 가리킨다. 계정·버킷처럼 배포마다 다른 값은 `.env`에서 읽는다(`.env.example`). 키 없이 로컬에서만 돌리려면 일부를 덮어쓴다:
+
+```bash
+export SKILL_EVAL_OVERRIDES="llm.provider=mock,labeler.jev.provider=mock,transport.backend=file,tracing.otlp_endpoint="
+```
+
 **코드 경로는 실모드와 동일**하고 config로만 전환한다.
 
 ## 단계별 실행
@@ -124,28 +158,35 @@ docker 없이 쓰려면 `transport.backend: file`), 저장은 로컬 디렉터�
 | 5. 정리 판정 | `make lifecycle` | `mart_skill_lifecycle` + `reports/lifecycle.md` |
 | 6. 라벨 품질 | `make label-quality` | 라벨러 비교표, τ 스윕, ECE (`reports/label_quality.md`) |
 | 7. 증류 | `make distill` → `make router` | 경량 모델 + 3단 라우팅 결과 (`reports/router.md`) |
-| (선택) 어려운 테스트셋 | `python -m eval.selection_eval --testset testsets/testset_v2_hard.jsonl --report`, `python -m eval.improve_loop --testset testsets/testset_v2_hard.jsonl` | 실 LLM용 65건(인접 도메인 negative·함정 표현). v1은 실 모델에게 너무 쉽다 |
+| (선택) 어려운 테스트셋 | `python -m eval.selection_eval --testset testsets/testset_v2_hard.jsonl --report`, `python -m eval.improve_loop --testset testsets/testset_v2_hard.jsonl` | 실 LLM용 90건(인접 도메인 negative·함정 표현). v1은 실 모델에게 너무 쉽다 |
 | (선택) 캐스케이드 상단 모델 비교 | `python -m eval.cascade_models` | `reports/cascade_models.md` (Haiku·Sonnet·Opus 승급 효과) |
 | (선택) RoBERTa | `pip install -e ".[distill]"` 후 `python -m distill.train_roberta` | `models/roberta_intent/` |
 
+### 실측 결과 — 2026-11-22, jev-1.14.0 + claude-haiku-5-5, 골든셋 100건, tx-v2
+
+| labeler | intent acc | macro F1 | OOS acc | $/1k (실측) | 평균 지연 | 승급률 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Jev | 97% | 0.96 | 97% | $0.030 | 225ms | - |
+| LLM (Haiku 5.5) | 99% | 0.99 | 100% | $0.219 | 1,868ms | 100% |
+| 캐스케이드 (τ=0.75) | 99% | 0.99 | 98% | $0.047 | 382ms | 5% |
+
+- Jev intent ECE 0.016 (확신도 0.9+ 구간 92건 정확도 100%) — 보정 확률을 그대로 τ로 쓸 만하다
+- 한국어 질의를 영어 instructions로 라벨링한 결과. 요청당 약 500 입력 토큰, 출력 토큰 무료
+- 승급 대상 5건은 Haiku·Sonnet·Opus 모두 100% — 캐스케이드 상단은 Haiku로 충분하다 (`python -m eval.cascade_models`)
+- taxonomy tx-v1에서는 승급 구간에서 큰 모델일수록 정확도가 낮게 나왔다. 원인은 모델이 아니라 `일정_정리` 라벨의 모호함이었고,
+  `복합_브리핑`으로 재정의한 것이 tx-v2다
+- 실 모델은 v1 설명으로도 기본 테스트셋을 99% 맞혀서 개선 여지가 없다. 설명 개선 루프는 인접 도메인 negative를 넣은
+  어려운 테스트셋(`testsets/testset_v2_hard.jsonl`)에서만 의미가 있다
+
 ### mock 모드 레퍼런스 결과
+
+외부 키 없이 `make demo`로 재현되는 값. 선택기가 설명-질의 토큰 중첩 기반이라 **실 모델 성능과는 무관**하고,
+개선 루프·회귀 가드가 끝까지 동작하는지 확인하는 용도다.
 
 - 스킬 선택 정확도: v1(의도적으로 애매한 설명) **53%** → 자동 개선 2회 채택 후 **88%**
   (3회차는 val 회귀 가드로 기각 — 과적합 방지 동작 확인)
 - 라벨러 비교(골든셋 100건, mock Jev): Jev 77% @ $0.05/1k ↔ LLM 90% @ $2.4/1k ↔ 캐스케이드 79% @ $1.47/1k
 - 3단 라우팅(경량 → Jev → LLM): LLM 호출 50% 감소, 1천 건당 $2.4 → $1.24
-
-### 실제 Jev(TypeSafe AI) 결과 — 2026-11-19, jev-1.14.0, 골든셋 100건
-
-| labeler | intent acc | macro F1 | OOS acc | $/1k (실측) | 평균 지연 | 승급률 |
-| --- | --- | --- | --- | --- | --- | --- |
-| Jev | 95% | 0.93 | 94% | $0.027 | 234ms | - |
-| LLM (mock) | 90% | 0.89 | 94% | $2.4 (가정) | 350ms | 100% |
-| 캐스케이드 (τ=0.75) | 96% | 0.95 | 96% | $0.24 | 252ms | 9% |
-
-- Jev intent ECE 0.05 (확신도 0.9+ 구간 85건 정확도 98.8%) — 보정 확률이 그대로 τ로 쓸 만함
-- 한국어 질의를 영어 instructions로 라벨링한 결과. 요청당 약 500 입력 토큰, 출력 토큰 무료
-- 상단 LLM은 아직 mock이므로 캐스케이드 수치는 `llm.provider: claude` 전환 후 재측정 필요
 
 ## 외부 서비스 전환 (config.yaml)
 
@@ -154,8 +195,8 @@ docker 없이 쓰려면 `transport.backend: file`), 저장은 로컬 디렉터�
 | Claude API | `llm.provider: claude` + `ANTHROPIC_API_KEY` | 선택기·설명 개선·라벨 캐스케이드 상단이 실 LLM으로 |
 | Kafka | **기본값** (`make infra-up`으로 기동) | Apache Kafka 3.8 KRaft(로컬) / MSK(배포). docker 없이 쓰려면 `transport.backend: file` |
 | Flink 적재 | **기본값** (`ingest.engine: flink`, `make infra-up`이 잡까지 제출) | Flink 1.20 SQL 잡이 Kafka → raw를 상시 적재. UI http://localhost:8081. 배치 drain으로 돌리려면 `engine: python` |
-| S3 | `storage.raw: s3://<bucket>/raw` + `.env`의 `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` | Flink 컨테이너가 S3 플러그인으로 직접 적재 (docker compose가 `.env`를 읽어 주입). cleanse의 S3 읽기는 `pip install -e ".[s3]"` |
-| Snowflake ELT | `pipeline/snowflake_setup.sql`(1회) 후 `make snowflake` 또는 Airflow | S3 raw → external stage `COPY INTO raw_events(VARIANT)` → **Snowflake 내부에서** quarantine·cleansed MERGE → mart 빌드 (전 단계 멱등) |
+| S3 | `.env`의 `SKILL_EVAL_RAW_URI=s3://<bucket>/raw` + `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` | Flink 컨테이너가 S3 플러그인으로 직접 적재 (docker compose가 `.env`를 읽어 주입). cleanse의 S3 읽기는 `pip install -e ".[s3]"` |
+| Snowflake ELT | `.env`의 `SNOWFLAKE_ACCOUNT`, `pipeline/snowflake_setup.sql`(1회) 후 `make snowflake` 또는 Airflow | S3 raw → external stage `COPY INTO raw_events(VARIANT)` → **Snowflake 내부에서** quarantine·cleansed MERGE → mart 빌드 (전 단계 멱등). 적재는 `SKILL_EVAL_LOADER`, Grafana 조회는 `SKILL_EVAL_READER` 롤 — 둘 다 계정 수준 권한이 없다 |
 | Airflow | `make airflow-up` (docker compose, CeleryExecutor. UI http://localhost:8082) | `skill_eval_elt` DAG가 매시: raw 커밋 대기(Flink) → COPY → MERGE → mart → 품질 체크 |
 | Jev API | **기본값** (`labeler.jev.provider: http`) + `.env`의 `JEV_API_KEY` | TypeSafe AI Jev(System One). taxonomy 질문을 choice/noul/score로 변환해 1요청에 묶고, 보정 확률을 `Tag.p`로 기록. mock으로 돌리려면 `provider: mock` |
 
@@ -171,6 +212,7 @@ taxonomy/     tx-v2.yaml (라벨 질문 버전 관리. v1의 일정_정리를 �
 eval/         선택 평가, 설명 개선 루프, 라벨 품질(τ 스윕·ECE), 정리 판정
 distill/      TF-IDF 베이스라인, klue/roberta-small 파인튜닝, 3단 라우터
 dashboard/    Streamlit (DuckDB mart 조회)
+tests/        pytest — 본문 미유출·비동기 라벨링, OTel 브리지, raw→cleansed 격리·중복 제거, mart 집계 (`make test`, CI)
 ```
 
 ## Mart 테이블
@@ -191,5 +233,5 @@ dashboard/    Streamlit (DuckDB mart 조회)
 
 - 공개 API·목 데이터·직접 생성한 테스트 트래픽만 사용 (회사 내부 데이터 금지)
 - 개선 루프는 `improve_loop.max_iterations`로 호출 상한, 모든 LLM 경로는 비용을 이벤트에 기록
-- Jev 한국어 성능은 `make label-quality`의 골든셋 비교로 4단계 전에 확인 (2026-11-19 실측: intent 95%)
+- Jev 한국어 성능은 `make label-quality`의 골든셋 비교로 4단계 전에 확인 (2026-11-22 실측: intent 97%)
 - `.env`는 `common/config.py`가 자동 로드. 키는 커밋하지 않는다 (.gitignore)

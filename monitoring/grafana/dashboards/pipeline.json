@@ -17,9 +17,22 @@
       {
         "name": "bucket",
         "label": "S3 버킷",
-        "type": "constant",
-        "query": "skill-eval-lake-740255825084",
-        "hide": 2
+        "type": "query",
+        "datasource": {
+          "type": "cloudwatch",
+          "uid": "cloudwatch"
+        },
+        "query": {
+          "queryType": "dimensionValues",
+          "namespace": "AWS/S3",
+          "region": "default",
+          "metricName": "BucketSizeBytes",
+          "dimensionKey": "BucketName",
+          "dimensionFilters": {}
+        },
+        "regex": "/^skill-eval-/",
+        "refresh": 1,
+        "sort": 1
       }
     ]
   },

@@ -35,9 +35,9 @@ ingest:
     parallelism: 1
 
 storage:
-  # raw 저장 위치. 운영: s3://<bucket>/raw (consumer가 S3에 직접 적재, fsspec)
+  # raw 저장 위치. 운영: .env에 SKILL_EVAL_RAW_URI=s3://<bucket>/raw (S3에 직접 적재, fsspec)
   # cleansed/quarantine 로컬 경로는 DuckDB 개발 루프용 — 운영 cleansed는 Snowflake 테이블
-  raw: s3://skill-eval-lake-740255825084/raw
+  raw: ${SKILL_EVAL_RAW_URI:-data/raw}
   cleansed: data/cleansed
   quarantine: data/quarantine
 
@@ -46,12 +46,13 @@ mart:
   backend: duckdb
   duckdb_path: data/mart.duckdb
   snowflake:
-    account: PMODJNM-KM82335
+    account: ${SNOWFLAKE_ACCOUNT:-}       # <org>-<account>. .env에 둔다
     database: SKILL_EVAL
     schema: MART
     warehouse: COMPUTE_WH
+    role: SKILL_EVAL_LOADER          # 적재 전용 롤 (snowflake_setup.sql 5단계). 조회는 SKILL_EVAL_READER
     raw_stage: SKILL_EVAL_RAW_STAGE  # s3://<bucket>/raw 위 external stage (snowflake_setup.sql로 구성)
-    # SNOWFLAKE_USER / SNOWFLAKE_PASSWORD 환경변수 사용
+    # 유저·인증은 .env (SNOWFLAKE_USER + PRIVATE_KEY_PATH 등)
 
 labeler:
   taxonomy: taxonomy/tx-v2.yaml

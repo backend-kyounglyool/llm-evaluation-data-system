@@ -1,0 +1,30 @@
+# 스킬 설명(SKILL.md)·테스트셋이 바뀔 때마다 오프라인 선택 평가 실행
+name: selection-eval
+
+on:
+  pull_request:
+    paths:
+      - "agent/skills/**"
+      - "testsets/**"
+      - "agent/selector.py"
+  workflow_dispatch:
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    env:
+      # 외부 키 없이 돌도록 모의 선택기를 쓴다. 절대 정확도가 아니라 설명 변경 전후 비교용
+      SKILL_EVAL_OVERRIDES: llm.provider=mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: 선택 평가 (val split)
+        run: python -m eval.selection_eval --split val --report
+      - name: 리포트 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: selection-eval-report
+          path: reports/
