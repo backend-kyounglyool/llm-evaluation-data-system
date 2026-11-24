@@ -26,9 +26,10 @@ flowchart LR
 
 로컬 개발 루프는 같은 코드 경로를 file → DuckDB로 돌린다 (`transport.backend: file`).
 
-핵심 설계: **원문(query)은 프로세스 밖으로 나가지 않는다.**
+핵심 설계: **원문(query)은 적재 경로(Kafka·S3·Snowflake)에 들어가지 않는다.**
 Span Processor가 본문으로 라벨링한 뒤 본문 속성을 삭제하고, 이벤트에는 태그·확률·지표만 담는다.
 `common/events.py`의 `assert_no_body()`가 전송 경계에서 이를 강제한다.
+본문이 남을 수 있는 곳은 디버깅용 트레이스 저장소(로컬 JSONL·Tempo)뿐이고, 기본은 꺼져 있다.
 
 ## 핵심 수치
 
@@ -211,7 +212,7 @@ taxonomy/     tx-v2.yaml (라벨 질문 버전 관리. v1의 일정_정리를 �
 eval/         선택 평가, 설명 개선 루프, 라벨 품질(τ 스윕·ECE), 정리 판정
 distill/      TF-IDF 베이스라인, klue/roberta-small 파인튜닝, 3단 라우터
 dashboard/    Streamlit (DuckDB mart 조회)
-tests/        pytest — 본문 미유출·비동기 라벨링, raw→cleansed 격리·중복 제거, mart 집계 (`make test`, CI)
+tests/        pytest — 본문 미유출·비동기 라벨링, OTel 브리지, raw→cleansed 격리·중복 제거, mart 집계 (`make test`, CI)
 ```
 
 ## Mart 테이블
