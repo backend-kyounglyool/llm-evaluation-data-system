@@ -67,7 +67,7 @@ dashboard:
 	.venv/bin/streamlit run dashboard/app.py
 
 # Snowflake ELT 수동 1회 실행 (평시엔 Airflow DAG skill_eval_elt가 매시 수행)
-# 필요: S3 raw + snowflake_setup.sql 구성, SNOWFLAKE_USER/PASSWORD 환경변수
+# 필요: S3 raw + snowflake_setup.sql 구성, .env의 SNOWFLAKE_USER와 인증 수단
 snowflake:
 	$(PY) -m pipeline.snowflake_elt
 

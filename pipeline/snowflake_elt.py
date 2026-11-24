@@ -238,6 +238,8 @@ def get_conn():
         "user": os.environ["SNOWFLAKE_USER"],
         "warehouse": cfg["warehouse"],
     }
+    if cfg.get("role"):
+        kwargs["role"] = cfg["role"]
     authenticator = os.environ.get("SNOWFLAKE_AUTHENTICATOR")
     key_path = os.environ.get("SNOWFLAKE_PRIVATE_KEY_PATH")
     if authenticator:
@@ -253,10 +255,8 @@ def get_conn():
             "SNOWFLAKE_PRIVATE_KEY_PATH 또는 SNOWFLAKE_PASSWORD를 설정하세요"
         )
     conn = snowflake.connector.connect(**kwargs)
-    cursor = conn.cursor()
-    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {cfg['database']}")
-    cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {cfg['database']}.{cfg['schema']}")
-    cursor.execute(f"USE SCHEMA {cfg['database']}.{cfg['schema']}")
+    # DB·스키마는 snowflake_setup.sql이 만든다 — 적재 롤에는 계정 수준 CREATE 권한이 없다
+    conn.cursor().execute(f"USE SCHEMA {cfg['database']}.{cfg['schema']}")
     return conn
 
 

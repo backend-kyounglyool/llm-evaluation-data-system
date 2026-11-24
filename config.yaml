@@ -50,8 +50,9 @@ mart:
     database: SKILL_EVAL
     schema: MART
     warehouse: COMPUTE_WH
+    role: SKILL_EVAL_LOADER          # 적재 전용 롤 (snowflake_setup.sql 5단계). 조회는 SKILL_EVAL_READER
     raw_stage: SKILL_EVAL_RAW_STAGE  # s3://<bucket>/raw 위 external stage (snowflake_setup.sql로 구성)
-    # SNOWFLAKE_USER / SNOWFLAKE_PASSWORD 환경변수 사용
+    # 유저·인증은 .env (SNOWFLAKE_USER + PRIVATE_KEY_PATH 등)
 
 labeler:
   taxonomy: taxonomy/tx-v2.yaml
