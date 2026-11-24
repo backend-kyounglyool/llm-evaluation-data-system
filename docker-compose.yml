@@ -191,7 +191,7 @@ services:
       # 공식 Snowflake 플러그인은 Enterprise 전용이라 커뮤니티(미서명) 플러그인을 쓴다
       GF_INSTALL_PLUGINS: https://github.com/michelin/snowflake-grafana-datasource/releases/download/v2.1.0/snowflake-grafana-datasource.zip;michelin-snowflake-datasource
       GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: michelin-snowflake-datasource
-      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT:-PMODJNM-KM82335}
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT:-}
       SNOWFLAKE_USER: ${SNOWFLAKE_USER:-}
       SNOWFLAKE_ROLE: ${SNOWFLAKE_ROLE:-SKILL_EVAL_READER}   # 조회 전용 롤
       SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE:-COMPUTE_WH}

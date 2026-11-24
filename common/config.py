@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -17,10 +18,17 @@ load_dotenv(PROJECT_ROOT / ".env")
 @lru_cache(maxsize=1)
 def load_config(path: str | None = None) -> dict[str, Any]:
     config_path = Path(path or os.environ.get("SKILL_EVAL_CONFIG", PROJECT_ROOT / "config.yaml"))
-    with open(config_path, encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = yaml.safe_load(expand_env(config_path.read_text(encoding="utf-8")))
     apply_overrides(config, os.environ.get("SKILL_EVAL_OVERRIDES", ""))
     return config
+
+
+ENV_REFERENCE = re.compile(r"\$\{(\w+)(?::-([^}]*))?\}")
+
+
+def expand_env(text: str) -> str:
+    """${VAR} 또는 ${VAR:-기본값}을 환경변수로 치환. 계정·버킷처럼 배포마다 다른 값은 .env에 둔다."""
+    return ENV_REFERENCE.sub(lambda m: os.environ.get(m.group(1), m.group(2) or ""), text)
 
 
 def apply_overrides(config: dict[str, Any], spec: str) -> None:

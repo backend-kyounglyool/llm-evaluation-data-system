@@ -1,5 +1,5 @@
 -- Snowflake 1회 셋업: S3 raw 버킷 ↔ Snowflake storage integration + external stage + 최소 권한 롤
--- ACCOUNTADMIN으로 실행. 740255825084, skill-eval-lake-740255825084을 실제 값으로 교체.
+-- ACCOUNTADMIN으로 실행. <AWS_ACCOUNT_ID>, <BUCKET>을 실제 값으로 교체.
 -- 전 구문이 멱등이라 다시 실행해도 된다.
 
 CREATE DATABASE IF NOT EXISTS SKILL_EVAL;
@@ -11,8 +11,8 @@ CREATE STORAGE INTEGRATION IF NOT EXISTS SKILL_EVAL_S3
   TYPE = EXTERNAL_STAGE
   STORAGE_PROVIDER = 'S3'
   ENABLED = TRUE
-  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::740255825084:role/skill-eval-snowflake'
-  STORAGE_ALLOWED_LOCATIONS = ('s3://skill-eval-lake-740255825084/raw/');
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::<AWS_ACCOUNT_ID>:role/skill-eval-snowflake'
+  STORAGE_ALLOWED_LOCATIONS = ('s3://<BUCKET>/raw/');
 
 -- 2) DESC INTEGRATION SKILL_EVAL_S3; 결과의
 --    STORAGE_AWS_IAM_USER_ARN / STORAGE_AWS_EXTERNAL_ID 를
@@ -21,7 +21,7 @@ CREATE STORAGE INTEGRATION IF NOT EXISTS SKILL_EVAL_S3
 
 -- 3) raw JSONL 위 external stage
 CREATE STAGE IF NOT EXISTS SKILL_EVAL_RAW_STAGE
-  URL = 's3://skill-eval-lake-740255825084/raw/'
+  URL = 's3://<BUCKET>/raw/'
   STORAGE_INTEGRATION = SKILL_EVAL_S3
   FILE_FORMAT = (TYPE = JSON);
 

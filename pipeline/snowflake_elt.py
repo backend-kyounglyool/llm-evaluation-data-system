@@ -229,7 +229,7 @@ def get_conn():
 
     cfg = load_config()["mart"]["snowflake"]
     if not cfg.get("account"):
-        raise SystemExit("config.yaml의 mart.snowflake.account가 비어 있음")
+        raise SystemExit("SNOWFLAKE_ACCOUNT 환경변수를 설정하세요 (<org>-<account>)")
     if not os.environ.get("SNOWFLAKE_USER"):
         raise SystemExit("SNOWFLAKE_USER 환경변수를 설정하세요")
 

@@ -139,10 +139,10 @@ make demo         # 트래픽 생성 → 파이프라인 → 평가 → 설명 �
 make dashboard    # Streamlit 대시보드
 ```
 
-`config.yaml` 기본값은 실 서비스(Claude·Jev·Kafka·Flink·S3)를 가리킨다. 키 없이 로컬에서만 돌리려면 일부를 덮어쓴다:
+`config.yaml` 기본값은 실 서비스(Claude·Jev·Kafka·Flink)를 가리킨다. 계정·버킷처럼 배포마다 다른 값은 `.env`에서 읽는다(`.env.example`). 키 없이 로컬에서만 돌리려면 일부를 덮어쓴다:
 
 ```bash
-export SKILL_EVAL_OVERRIDES="llm.provider=mock,labeler.jev.provider=mock,transport.backend=file,storage.raw=data/raw,tracing.otlp_endpoint="
+export SKILL_EVAL_OVERRIDES="llm.provider=mock,labeler.jev.provider=mock,transport.backend=file,tracing.otlp_endpoint="
 ```
 
 **코드 경로는 실모드와 동일**하고 config로만 전환한다.
@@ -195,8 +195,8 @@ export SKILL_EVAL_OVERRIDES="llm.provider=mock,labeler.jev.provider=mock,transpo
 | Claude API | `llm.provider: claude` + `ANTHROPIC_API_KEY` | 선택기·설명 개선·라벨 캐스케이드 상단이 실 LLM으로 |
 | Kafka | **기본값** (`make infra-up`으로 기동) | Apache Kafka 3.8 KRaft(로컬) / MSK(배포). docker 없이 쓰려면 `transport.backend: file` |
 | Flink 적재 | **기본값** (`ingest.engine: flink`, `make infra-up`이 잡까지 제출) | Flink 1.20 SQL 잡이 Kafka → raw를 상시 적재. UI http://localhost:8081. 배치 drain으로 돌리려면 `engine: python` |
-| S3 | `storage.raw: s3://<bucket>/raw` + `.env`의 `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` | Flink 컨테이너가 S3 플러그인으로 직접 적재 (docker compose가 `.env`를 읽어 주입). cleanse의 S3 읽기는 `pip install -e ".[s3]"` |
-| Snowflake ELT | `pipeline/snowflake_setup.sql`(1회) 후 `make snowflake` 또는 Airflow | S3 raw → external stage `COPY INTO raw_events(VARIANT)` → **Snowflake 내부에서** quarantine·cleansed MERGE → mart 빌드 (전 단계 멱등). 적재는 `SKILL_EVAL_LOADER`, Grafana 조회는 `SKILL_EVAL_READER` 롤 — 둘 다 계정 수준 권한이 없다 |
+| S3 | `.env`의 `SKILL_EVAL_RAW_URI=s3://<bucket>/raw` + `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` | Flink 컨테이너가 S3 플러그인으로 직접 적재 (docker compose가 `.env`를 읽어 주입). cleanse의 S3 읽기는 `pip install -e ".[s3]"` |
+| Snowflake ELT | `.env`의 `SNOWFLAKE_ACCOUNT`, `pipeline/snowflake_setup.sql`(1회) 후 `make snowflake` 또는 Airflow | S3 raw → external stage `COPY INTO raw_events(VARIANT)` → **Snowflake 내부에서** quarantine·cleansed MERGE → mart 빌드 (전 단계 멱등). 적재는 `SKILL_EVAL_LOADER`, Grafana 조회는 `SKILL_EVAL_READER` 롤 — 둘 다 계정 수준 권한이 없다 |
 | Airflow | `make airflow-up` (docker compose, CeleryExecutor. UI http://localhost:8082) | `skill_eval_elt` DAG가 매시: raw 커밋 대기(Flink) → COPY → MERGE → mart → 품질 체크 |
 | Jev API | **기본값** (`labeler.jev.provider: http`) + `.env`의 `JEV_API_KEY` | TypeSafe AI Jev(System One). taxonomy 질문을 choice/noul/score로 변환해 1요청에 묶고, 보정 확률을 `Tag.p`로 기록. mock으로 돌리려면 `provider: mock` |
 

@@ -7,7 +7,7 @@
 - 모든 단계가 멱등: COPY는 load history, cleansed/quarantine은 MERGE 키로 중복을 막으므로
   재시도·백필에 안전하다.
 - 자격증명: SNOWFLAKE_USER/PASSWORD, AWS_* 는 Airflow 환경변수 또는
-  Connection(env var 주입)으로 공급. config.yaml의 storage.raw는 s3://<bucket>/raw.
+  Connection(env var 주입)으로 공급. .env의 SKILL_EVAL_RAW_URI는 s3://<bucket>/raw.
 """
 from __future__ import annotations
 
