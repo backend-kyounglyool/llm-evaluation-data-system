@@ -74,6 +74,12 @@ ORDER BY items DESC
 """
 
 
+SELECTION_EVAL_COLUMNS = [
+    "run_id", "skill_version", "cases", "accuracy", "macro_precision", "macro_recall",
+    "false_pick_rate", "miss_rate", "negative_false_pick_rate",
+]
+
+
 def selection_eval_frame(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     selections = con.execute(
         """
@@ -113,7 +119,8 @@ def selection_eval_frame(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
                 "negative_false_pick_rate": round(float(negative_fp), 4),
             }
         )
-    return pd.DataFrame(rows)
+    # 평가 run이 없어도(live 트래픽만 있는 경우) 열은 유지해야 빈 mart 테이블을 만들 수 있다
+    return pd.DataFrame(rows, columns=SELECTION_EVAL_COLUMNS)
 
 
 MEASURED_LABELER_COST = PROJECT_ROOT / "reports/label_quality.json"
